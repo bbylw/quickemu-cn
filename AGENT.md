@@ -1,6 +1,9 @@
-# This Nimbus docs site
+# Quickemu 中文文档站（Nimbus docs site）
 
 > `CLAUDE.md` delegates here. Keep project instructions canonical in this file.
+>
+> 站点：根路径 `/` 是独立落地页（`src/pages/index.astro`），文档全部挂在
+> `/docs` 下（内容目录 `src/content/docs/docs/`）。界面语言为中文。
 
 Astro-based docs. The `nimbus-docs` package handles content schemas, sidebar/TOC, MDX→markdown, build hooks, and the `nimbus-docs` CLI. Install dependencies first, then run it as `npx @cloudflare/nimbus-docs <command>`: npx uses the project's installed version. Before an install, npx fetches the latest release instead, which may differ from the site's version and give different results. The scoped name keeps npx from fetching the unrelated `nimbus-docs` package. Everything in `src/` is yours to edit.
 
@@ -11,11 +14,10 @@ astro.config.ts              # imports nimbus + defineNimbusConfig
 nimbus.json                  # records the last reviewed Nimbus package version
 src/
 ├── components.ts            # MDX globals — components every .mdx can use without an import
-├── components/              # AgentDirective, Header, Logo (drawn from logo.ts), Render + ui/<slug>/
+├── components/              # AgentDirective, Header, Logo (public/images/logo.png), Render + ui/<slug>/
 ├── content/
 │   ├── docs/*.mdx
-│   └── partials/*.mdx       # referenced via <Render file="..." />
-├── content.config.ts        # registers docsCollection() + partialsCollection()
+├── content.config.ts        # registers docsCollection() (partials not enabled)
 ├── layouts/                 # BaseLayout (NimbusHead), DocsLayout (sidebar/TOC/breadcrumbs)
 ├── lib/cn.ts                # Tailwind className merger
 ├── pages/
@@ -56,7 +58,7 @@ Content here. The page H1 comes from `title` — don't repeat it in the body.
 Rules:
 
 - **Components are PascalCase.** Register one in `src/components.ts` to use it in every `.mdx` without an import, or import it in the file that uses it. A pre-build validator catches unresolved names with a "did you mean" hint.
-- **Partials use `<Render file="..." />`.** Don't import `.mdx` directly. Shared content lives in `src/content/partials/<slug>.mdx`.
+- **Partials are not enabled.** To use `<Render file="..." />`, add `partialsCollection()` to `content.config.ts` and create `src/content/partials/<slug>.mdx`. Don't import `.mdx` directly.
 - **Icons use Nimbus's `Icon` + Phosphor.** `<Icon name="ph:<glyph>" class="w-4 h-4" />` from `@cloudflare/nimbus-docs/components/Icon.astro`. Glyphs: [phosphoricons.com](https://phosphoricons.com).
 - **Don't remove `<AgentDirective />` from `BaseLayout.astro`.** It points agents at `/llms.txt`.
 
@@ -64,13 +66,13 @@ Rules:
 
 | Goal | Action |
 |---|---|
-| New doc page | Create `src/content/docs/<slug>.mdx`. Sidebar picks it up. |
-| New partial | Create `src/content/partials/<slug>.mdx`. Use via `<Render file="<slug>" />`. |
+| New doc page | Create `src/content/docs/docs/<slug>.mdx`. Sidebar picks it up. |
+| New partial | Not enabled. Add `partialsCollection()` to `content.config.ts` and create `src/content/partials/<slug>.mdx` to use `<Render file="<slug>" />`. |
 | UI from registry | `npx @cloudflare/nimbus-docs add <slug>`. Register in `src/components.ts` if used in MDX. |
 | Feature recipe | `npx @cloudflare/nimbus-docs add <feature-slug> --print`. Prints the recipe for you to follow; it changes no files itself. |
 | Check it builds | `npx @cloudflare/nimbus-docs check` — build-free preflight (env + structure + authoring + types). `--json` for an agent loop, `--fix` to repair what's safe. |
 | Custom page route | Add a file under `src/pages/`. |
-| Custom OG style | Edit `src/pages/og/_card.ts`. The card draws the logo from `src/components/logo.ts`, the same drawing as the header. |
+| Custom OG style | Edit `src/pages/og/_card.ts`. The card inlines `public/images/logo.png`; Chinese titles are covered by the `_fonts/QuickemuCJK-*.ttf` subset (regenerate with pyftsubset when a card's text gains new CJK characters). |
 | Check for updates | `npx @cloudflare/nimbus-docs outdated` — starter files behind their tag + registry components behind. |
 | Upgrade Nimbus | Update the package, then run `npx @cloudflare/nimbus-docs migrate --dry-run --diff`. Review every change and required manual step before applying. |
 | Upgrade a starter file | `npx @cloudflare/nimbus-docs diff <file>` to review, `diff --apply <file>` to pull a clean upstream change. |
@@ -83,7 +85,7 @@ List installable items: `npx @cloudflare/nimbus-docs list`.
 
 ## Sidebar
 
-The sidebar mirrors `src/content/docs/`. A folder becomes a group, and its `index.mdx` is the group's landing page; set `sidebar.group.label` there to rename the group. Within a group, `sidebar.order` sorts entries (lowest first, otherwise alphabetical), `sidebar.label` shortens a page's rail title, and `sidebar.hidden: true` builds a page without listing it.
+The sidebar mirrors `src/content/docs/docs/`. A folder becomes a group, and its `index.mdx` is the group's landing page; set `sidebar.group.label` there to rename the group. Within a group, `sidebar.order` sorts entries (lowest first, otherwise alphabetical), `sidebar.label` shortens a page's rail title, and `sidebar.hidden: true` builds a page without listing it.
 
 To add an external link or fix the top-level order, set `sidebar.items` in `defineNimbusConfig` in `astro.config.ts`. Items you list replace the generated top level, and a listed item's `label` wins over the folder's `sidebar.group.label`:
 
@@ -96,7 +98,7 @@ sidebar: {
 },
 ```
 
-The header's section tabs come from the same list: each top-level item that autogenerates from another collection (`{ label: "API", autogenerate: { collection: "api", prefix: "/reference" } }`) becomes a tab, and the tabs show once there are two. Folders of `src/content/docs/` and external links stay in the sidebar. For any other header link, edit `src/components/Header.astro`.
+The header's section tabs come from the same list: each top-level item that autogenerates from another collection (`{ label: "API", autogenerate: { collection: "api", prefix: "/reference" } }`) becomes a tab, and the tabs show once there are two. Folders of `src/content/docs/docs/` and external links stay in the sidebar. For any other header link, edit `src/components/Header.astro`.
 
 Everything else: <https://nimbus-docs.com/navigation/sidebar/>.
 

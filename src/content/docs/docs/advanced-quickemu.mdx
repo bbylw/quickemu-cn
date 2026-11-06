@@ -214,13 +214,26 @@ sudo apt-get install --no-install-recommends samba
 
 支持 Linux 与 Windows 客户机。
 
-（待补充）
+共享的宿主目录由 `--public-dir` 控制：默认为当前用户的 Public 目录（`xdg-user-dir PUBLICSHARE`），也可指定其它目录或设为 `none` 关闭。
+
+客户机侧需要安装 SPICE WebDAV 代理：
+
+- Linux 客户机：Debian/Ubuntu 执行 `sudo apt install spice-webdavd`。
+- Windows 客户机：用 `quickget` 创建的虚拟机已自动安装所需驱动。
+
+安装并启动虚拟机后，共享目录会作为 WebDAV 挂载出现在客户机中，可直接读写宿主机的文件。
 
 ### VirtIO-9P
 
 支持 Linux 与 macOS 客户机。
 
-（待补充）
+Quickemu 会通过 VirtIO-9P 把宿主机的共享目录挂载到客户机中，无需网络即可访问宿主文件。共享目录同样由 `--public-dir` 控制（默认是当前用户的 Public 目录）：
+
+```shell
+quickemu --vm ubuntu-24.04.conf --public-dir /path/to/share
+```
+
+在 Linux 客户机中，该目录通常挂载在 `~/Public` 下；如果看不到，请确认客户机内核已启用 9p 支持（大多数发行版默认启用）。
 
 ## 网络
 

@@ -20,3 +20,10 @@ pnpm-debug.log*
 .idea/
 .vscode/*
 !.vscode/extensions.json
+
+# 本地预览/审核临时产物
+/.cdp-*.png
+/.land.png
+/.docs.png
+/.adv.png
+/.shot-*.png

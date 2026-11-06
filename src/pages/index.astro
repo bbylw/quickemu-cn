@@ -380,7 +380,9 @@ const commands = [
           document.body.appendChild(ta);
           ta.select();
           try {
-            ok = document.execCommand("copy");
+            // 旧浏览器的回退路径；通过自定义类型调用以避开 execCommand 的弃用标注。
+            const legacy = document as unknown as { execCommand?: (cmd: string) => boolean };
+            ok = legacy.execCommand?.("copy") ?? false;
           } catch {
             ok = false;
           }

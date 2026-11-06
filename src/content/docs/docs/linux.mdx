@@ -20,10 +20,8 @@ quickemu --vm ubuntu-24.04.conf
 
 - 像平常一样完成安装。
 - 安装完成后：
-  - 在客户机中安装 SPICE 代理（`spice-vdagent`）以启用复制/粘贴与 USB 重定向。
-    - `sudo apt install spice-vdagent`
-  - 在客户机中安装 SPICE WebDAV 代理（`spice-webdavd`）以启用文件共享。
-    - `sudo apt install spice-webdavd`
+
+<Render file="spice-agents" />
 
 ### Ubuntu 每日镜像（daily-live）
 
@@ -61,8 +59,8 @@ quickemu --vm my-custom-linux.conf
 
 - 像平常一样完成安装。
 - 安装完成后：
-  - 在客户机中安装 SPICE 代理（`spice-vdagent`）以启用复制/粘贴与 USB 重定向。
-  - 在客户机中安装 SPICE WebDAV 代理（`spice-webdavd`）以启用文件共享。
+
+<Render file="spice-agents" />
 
 ### 支持旧版 Linux 发行版
 

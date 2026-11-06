@@ -31,24 +31,16 @@ Quickemu 是对出色的 [QEMU](https://www.qemu.org/) 的一层封装，在创�
 
 ## 快速上手
 
-<Steps>
-  <Step title="生成配置文件">
-    使用 `quickget` 自动下载你需要的操作系统 ISO 并创建虚拟机配置文件。
+创建并运行一台虚拟机只需两条命令：
 
-    ```sh
-    quickget nixos unstable minimal
-    ```
-  </Step>
-  <Step title="启动虚拟机">
-    使用生成的配置文件启动虚拟机。
+```sh
+quickget nixos unstable minimal
+quickemu --vm nixos-unstable-minimal.conf
+```
 
-    ```sh
-    quickemu --vm nixos-unstable-minimal.conf
-    ```
-  </Step>
-</Steps>
-
-执行 `quickget`（不带任何参数）即可查看所有支持的操作系统列表。
+<Aside type="tip" title="完整步骤">
+分步说明、参数查询与更多示例见[快速上手](/docs/quick-start)；执行 `quickget`（不带参数）可列出所有支持的系统。
+</Aside>
 
 ## 主要特性
 

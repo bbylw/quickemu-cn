@@ -1,5 +1,5 @@
 {
-  "name": "nimbus-docs",
+  "name": "quickemu-docs",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -36,5 +36,7 @@
     "tailwindcss": "^4.1.4",
     "typescript": "^5.8.3",
     "wrangler": "^4.95.0"
-  }
+  },
+  "description": "Quickemu \u4e2d\u6587\u6587\u6863\u7ad9\uff08Nimbus + Astro + Tailwind CSS + Bun\uff09",
+  "license": "MIT"
 }
