@@ -1,0 +1,293 @@
+---
+title: 创建 macOS 虚拟机
+description: 使用 quickget 自动创建 macOS 客户机，含兼容性、音频与 TSC 说明
+sidebar:
+  order: 5
+---
+
+**在虚拟机中安装 macOS 有时会比较挑剔，如果遇到问题，请到 [Discussions](https://github.com/quickemu-project/quickemu/discussions) 寻找解决方案或提问** 🛟
+
+`quickget` 会自动下载 macOS 恢复镜像并创建虚拟机配置。
+
+<Aside type="note">
+部分 VPN 用户可能需要[关闭 VPN](https://github.com/quickemu-project/quickemu/issues/1391#issuecomment-3506845235) 才能下载恢复镜像；而另一些用户则可能[需要使用 VPN](https://github.com/quickemu-project/quickemu/issues/1391#issuecomment-2429146013) 才能下载。
+</Aside>
+
+```shell
+quickget macos big-sur
+quickemu --vm macos-big-sur.conf
+```
+
+支持的 macOS 版本：`mojave`、`catalina`、`big-sur`、`monterey`、`ventura`、`sonoma`、`sequoia`、`tahoe`。
+
+- 使用方向键与回车键选择 **macOS Base System**
+- 在 **macOS 实用工具**中：
+  - 点击 **磁盘工具** → **继续**
+    - 从列表中选择 `QEMU HARDDISK Media`（约 103.08GB），Big Sur 及以上请选择 `Apple Inc. VirtIO Block Device`，然后点击 **抹掉**。
+    - 为磁盘输入 `名称`。
+    - 如果安装的是 macOS Mojave 及更高版本（Catalina、Big Sur、Monterey、Ventura、Sonoma），文件系统请选择任意 APFS 选项。macOS 扩展（HFS+）可能无法使用。
+  - 点击 **抹掉**。
+  - 点击 **完成**。
+  - 关闭磁盘工具。
+- 在 **macOS 实用工具**中：
+  - 点击 **重新安装 macOS** → **继续**
+- 像平常一样完成安装。
+  - 第一次重启时，用方向键与回车键选择 **macOS Installer**
+  - 之后的重启，选择你命名的那个磁盘
+- 安装完成后会出现首次启动向导，用于配置各项设置并创建用户名与密码。
+- 可选：向导结束后，建议启用 TRIM。TRIM 能让 Quickemu 在你删除虚拟机内文件时压缩（收缩）macOS 磁盘镜像；否则镜像只会越来越大，即使删除了大量数据也不会缩小。
+  - 启用 TRIM：打开「终端」，输入以下命令并回车，让 macOS 在文件删除时对硬盘使用 TRIM：
+
+```shell
+sudo trimforce enable
+```
+
+系统会要求你输入账户密码。输入并回车后，命令会提出两个确认问题，需要你输入 <kbd>y</kbd>（表示“是”）并回车来确认。
+
+如果直接回车而没有先输入 <kbd>y</kbd>，系统会视为否定回答（相当于“否”）：
+
+```plain
+IMPORTANT NOTICE: This tool force-enables TRIM for all relevant attached devices, even though such devices may not have been validated for data integrity while using TRIM. ...
+Are you sure you with to proceed (y/N)?
+```
+
+以及第二个确认：
+
+```plain
+Your system will immediately reboot when this is complete.
+Is this OK (y/N)?
+```
+
+如最后一条消息所述，命令完成后系统会立即自动重启。
+
+默认的 macOS 配置如下：
+
+```shell
+guest_os="macos"
+img="macos-big-sur/RecoveryImage.img"
+disk_img="macos-big-sur/disk.qcow2"
+macos_release="big-sur"
+```
+
+- `guest_os="macos"` 告诉 Quickemu 针对 macOS 进行优化。
+- `macos_release="big-sur"` 告诉 Quickemu 针对特定 macOS 版本进行优化。
+  - 例如，VirtIO 网络与内存气球（Ballooning）在 Big Sur 及更新版本中可用，更早版本则不可用。
+  - 而 VirtIO Block Media（磁盘）在 Catalina 及更新版本中才稳定支持。
+
+## macOS 兼容性
+
+通过 Quickemu 运行 macOS 时有一些注意事项。
+
+- 支持的 macOS 版本：Mojave、Catalina、Big Sur、Monterey、Ventura、Sonoma、Sequoia、Tahoe
+- `quickemu` 会自动从 [OSX-KVM](https://github.com/kholia/OSX-KVM) 下载所需的 [OpenCore](https://github.com/acidanthera/OpenCorePkg) 引导器与 OVMF 固件。
+  - 默认已优化，但不提供 GPU 加速。
+  - 会检测宿主机 CPU 厂商，并据此优化客户机 CPU。
+  - 在支持的版本上，系统磁盘使用 [VirtIO Block Media](https://www.kraxel.org/blog/2019/06/macos-qemu-guest/)。
+  - 鼠标使用 [VirtIO `usb-tablet`](http://philjordan.eu/osx-virt/)。
+  - VirtIO 网络（`virtio-net`）在 macOS Big Sur 及更新版本上受支持并启用，更早版本使用 `vmxnet3`。
+  - VirtIO 内存气球在 macOS Big Sur 及更新版本上受支持并启用，其它受支持的版本则禁用。
+- USB 主机直通与 SPICE 直通：
+  - macOS Catalina 及更早：UHCI（USB 2.0）。
+  - macOS Big Sur 及更新：XHCI（USB 3.0）。
+- 可通过 `quickemu` 的 `--width` 与 `--height` 命令行参数更改显示分辨率。
+- 客户机与宿主机之间的文件共享可通过 [virtio-9p](https://wiki.qemu.org/Documentation/9psetup) 与 [SPICE webdavd](https://gitlab.gnome.org/GNOME/phodav/-/merge_requests/24) 实现。
+- **macOS 上不支持**通过 SPICE 代理进行复制/粘贴。
+
+## 音频支持
+
+Quickemu 会根据 macOS 版本自动选择正确的声卡：
+
+| macOS 版本 | 声卡 | 说明 |
+|---|---|---|
+| Monterey、Ventura、Sonoma、Sequoia、Tahoe | `virtio-sound-pci` | 原生 VirtIO 驱动，开箱即用 |
+| Big Sur | `ich9-intel-hda` | 需要 VoodooHDA kext；11.3+ 起不可靠 |
+| Catalina 及更早 | `intel-hda` | 需要 VoodooHDA kext |
+
+**要点：**
+
+- macOS 12（Monterey）及更高版本内置原生 VirtIO 声卡驱动，无需额外软件即可发声。
+- VoodooHDA 从 macOS 11.3 起通过 OpenCore 注入后不再可靠。
+- Big Sur 处于旧 HDA 方案与原生 VirtIO 之间的过渡期，音频问题较多。
+- Big Sur 及更早版本如需音频，可安装 [VoodooHDA OC](https://github.com/chris1111/VoodooHDA-OC)。注意安装它需要关闭 [Gatekeeper](https://disable-gatekeeper.github.io/) 与[系统完整性保护（SIP）](https://developer.apple.com/documentation/security/disabling_and_enabling_system_integrity_protection)。
+- 也可以直通一个 USB 音频设备给 macOS 客户机，从而在任何版本上都能稳定发声。
+
+## AMD Ryzen 移动 CPU 上的 TSC 不稳定
+
+macOS Ventura（13）、Sonoma（14）、Sequoia（15）对 TSC（时间戳计数器）的要求比早期版本更严格。在某些 AMD Ryzen 移动 CPU 上，TSC 会在启动校准阶段被标记为不稳定，导致这些较新的 macOS 版本卡死或启动失败，并报 "Non-monotonic time" 错误。
+
+**受影响的 CPU：**
+
+- AMD Ryzen 4000U 系列（Renoir）
+- AMD Ryzen 5000U 系列（Cezanne/Lucienne）
+- 部分 AMD Ryzen Zen 4 移动芯片（7945HX、Z1 Extreme）
+
+**不受影响：**
+
+- AMD Ryzen 6000U 系列（Rembrandt）
+- Intel CPU
+- AMD 桌面级 CPU（通常）
+
+较早的 macOS 版本（Big Sur 及更早）容忍度更高，通常能正常使用。
+
+### 检查是否受影响
+
+查看当前时钟源：
+
+```shell
+cat /sys/devices/system/clocksource/clocksource0/current_clocksource
+```
+
+如果显示的是 `hpet` 或 `acpi_pm` 而不是 `tsc`，说明你的 TSC 已被标记为不稳定，可能会在较新的 macOS 版本上遇到问题。
+
+也可以查看 dmesg 中的 TSC 警告：
+
+```shell
+dmesg | grep -i tsc
+```
+
+留意类似 "Marking TSC unstable" 或 "clocksource: timekeeping watchdog on CPU: Marking clocksource 'tsc' as unstable" 的消息。
+
+### 解决方案：`tsc=reliable` 内核参数
+
+如果你的 TSC 被标记为不稳定、但实际在启动后已稳定（在受影响的 CPU 上很常见），可以通过在内核启动参数中加入 `tsc=reliable` 来让 Linux 信任它。
+
+**GRUB：**
+
+1. 编辑 `/etc/default/grub`
+2. 在 `GRUB_CMDLINE_LINUX_DEFAULT` 行加入 `tsc=reliable`
+3. 运行 `sudo update-grub`（Debian/Ubuntu）或 `sudo grub-mkconfig -o /boot/grub/grub.cfg`（Arch/Fedora）
+4. 重启
+
+**systemd-boot：**
+
+1. 编辑 `/boot/loader/entries/` 下的启动项
+2. 在 `options` 行加入 `tsc=reliable`
+3. 重启
+
+**验证是否生效：**
+
+```shell
+cat /proc/cmdline | grep tsc=reliable
+cat /sys/devices/system/clocksource/clocksource0/current_clocksource  # 现在应显示 'tsc'
+```
+
+### 备选方案：使用较旧的 macOS 版本
+
+如果你不想修改内核参数，macOS Big Sur（11）及更早版本对 TSC 不稳定的容忍度更高，在受影响的硬件上应能正常使用。
+
+### 重要提示
+
+- `tsc=reliable` 是系统级参数，会影响所有虚拟机，而不仅 macOS。
+- 仅当你的 TSC 在启动后确实已稳定时才使用此方案。如果你持续遇到与时间相关的问题，此方案可能不适用于你的系统。
+- BIOS 更新有时能改善 TSC 校准，请查看厂商是否有可用更新。
+
+更多技术细节与讨论见 [GitHub Issue #1273](https://github.com/quickemu-project/quickemu/issues/1273)。
+
+## Apple ID 登录
+
+macOS 虚拟机默认通常会被阻止使用 Apple ID 登录，因为序列号、MAC 地址等信息在多个虚拟机之间共享。
+
+要解决这个问题，可以使用 [qe_mac_apid](https://github.com/quickemu-project/qe_mac_apid) 工具在引导器中替换或随机化这些值。
+
+## macOS App Store
+
+如果你在尝试登录 App Store 时看到 *"Your device or computer could not be verified"*，请确认你的有线网卡是 `en0`。在终端中用 `ifconfig` 验证。
+
+如果有线网卡不是 `en0`，请进入 *系统偏好设置* → *网络*，删除所有网络设备并应用更改。然后打开终端运行：
+
+```shell
+sudo rm /Library/Preferences/SystemConfiguration/NetworkInterfaces.plist
+```
+
+重启后 App Store 应该就能正常使用了。
+
+## iPhone USB 直通（实验性）
+
+将 iPhone 连接到 macOS 虚拟机以进行 Xcode 开发是可行的，但需要额外配置。这是实验性功能，成功率取决于你的硬件与宿主 Linux 发行版。
+
+<Aside type="caution">
+此过程复杂且可能不稳定，请视为实验性、不受支持。用于生产环境的 iOS 开发，建议使用实体 Mac。
+</Aside>
+
+### 前置条件
+
+- Linux 宿主机（非 macOS 宿主机）
+- iPhone（iPad 成功率更低）
+- USB 数据线（直连，不要经过集线器）
+- 台式机（笔记本报告的问题更多）
+
+### 宿主机配置
+
+**1. 为 iPhone 访问创建 udev 规则**
+
+```shell
+sudo nano /etc/udev/rules.d/97-iphone.rules
+```
+
+加入以下内容（把 `your-group` 换成你用户的主组）：
+
+```text
+SUBSYSTEMS=="usb", ATTRS{idVendor}=="05ac", ATTRS{idProduct}=="*", GROUP="your-group", MODE="0660"
+```
+
+重新加载 udev 规则：
+
+```shell
+sudo udevadm control --reload-rules
+```
+
+**2. 停止冲突的服务**
+
+宿主机的 `usbmuxd` 服务会与 iPhone 争抢，停止并禁用它：
+
+```shell
+sudo systemctl stop usbmuxd
+sudo systemctl mask usbmuxd
+```
+
+在某些发行版上还要停止：
+
+```shell
+sudo killall gvfs-afc-volume-monitor 2>/dev/null
+```
+
+### 虚拟机配置
+
+把 iPhone 加入你的 macOS 虚拟机配置：
+
+```shell
+guest_os="macos"
+disk_img="macos-sonoma/disk.qcow2"
+img="macos-sonoma/RecoveryImage.img"
+macos_release="sonoma"
+display="gtk"
+usb_devices=("05ac:12a8")
+```
+
+**注意**：产品 ID `12a8` 对 iPhone 很常见，但你的可能不同。用以下命令查找你 iPhone 的 ID：
+
+```shell
+lsusb | grep -i apple
+```
+
+### 局限性
+
+- **反复断开/重连**：iPhone 可能反复断开重连。有时在 iPhone 上开启飞行模式会有帮助。
+- **信任弹窗时机**：弹窗出现时你可能需要迅速点击 "Trust"。
+- **Xcode 识别**：即使已连接，Xcode 也可能无法稳定识别设备。
+- **iPad**：成功率通常低于 iPhone。
+
+### 备选方案：无线调试
+
+更可靠的做法是使用 Xcode 的无线调试功能代替 USB 直通。在一台实体 Mac 上配对一次后，就可以从虚拟机使用无线调试。
+
+### 故障排查
+
+如果看到 `LIBUSB_ERROR_NOT_FOUND` 或 "Device is in use by another application"：
+
+1. 确认 `usbmuxd` 已停止：`systemctl status usbmuxd`
+2. 检查没有其它进程占用设备：`lsof /dev/bus/usb/*/*`
+3. 换一个 USB 端口（USB 2.0 端口有时效果更好）
+4. 重启宿主机后重试
+
+更多排查方法与社区方案见 [issue #468](https://github.com/quickemu-project/quickemu/issues/468)。

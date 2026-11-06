@@ -1,0 +1,70 @@
+---
+title: 创建 Linux 虚拟机
+description: 自动或手动创建 Linux 客户机，含 Ubuntu 每日镜像与旧发行版支持
+sidebar:
+  order: 4
+---
+
+`quickget` 是 Quickemu 的一部分，用于自动下载操作系统镜像并生成经过优化的虚拟机配置。
+
+`quickget -h` 会列出它支持的所有操作系统，包括数百个 Linux 发行版版本、各种 BSD、macOS、Windows、FreeDOS 等。
+
+## 自动创建 Linux 客户机
+
+下面以创建并运行 Ubuntu 客户机为例，其它 Linux 发行版的流程基本相同。
+
+```shell
+quickget ubuntu 24.04
+quickemu --vm ubuntu-24.04.conf
+```
+
+- 像平常一样完成安装。
+- 安装完成后：
+  - 在客户机中安装 SPICE 代理（`spice-vdagent`）以启用复制/粘贴与 USB 重定向。
+    - `sudo apt install spice-vdagent`
+  - 在客户机中安装 SPICE WebDAV 代理（`spice-webdavd`）以启用文件共享。
+    - `sudo apt install spice-webdavd`
+
+### Ubuntu 每日镜像（daily-live）
+
+`quickget` 还能通过 `zsync` 为 Ubuntu 开发者和测试者下载/刷新每日镜像。
+
+```shell
+quickget ubuntu daily-live
+quickemu --vm ubuntu-daily-live.conf
+```
+
+你可以随时运行 `quickget ubuntu daily-live` 来刷新每日开发镜像，它甚至会自动切换到新的开发代号。
+
+**Ubuntu 衍生版**
+
+所有官方 Ubuntu 衍生版均受支持，只需把 `ubuntu` 换成对应的衍生版名：`edubuntu`（Edubuntu）、`kubuntu`（Kubuntu）、`lubuntu`（Lubuntu）、`ubuntu-budgie`（Ubuntu Budgie）、`ubuntucinnamon`（Ubuntu Cinnamon）、`ubuntukylin`（Ubuntu Kylin）、`ubuntu-mate`（Ubuntu MATE）、`ubuntustudio`（Ubuntu Studio）、`ubuntu-unity`（Ubuntu Unity）、`xubuntu`（Xubuntu）。
+
+## 手动创建 Linux 客户机
+
+你也可以自行下载 Linux 镜像并手动创建虚拟机配置。
+
+- 下载某个 Linux 发行版的 `.iso` 镜像。
+- 创建虚拟机配置文件，例如 `my-custom-linux.conf`：
+
+```shell
+guest_os="linux"
+disk_img="my-custom-linux/disk.qcow2"
+iso="my-custom-linux/my-custom-linux.iso"
+```
+
+- 使用 `quickemu` 启动虚拟机：
+
+```shell
+quickemu --vm my-custom-linux.conf
+```
+
+- 像平常一样完成安装。
+- 安装完成后：
+  - 在客户机中安装 SPICE 代理（`spice-vdagent`）以启用复制/粘贴与 USB 重定向。
+  - 在客户机中安装 SPICE WebDAV 代理（`spice-webdavd`）以启用文件共享。
+
+### 支持旧版 Linux 发行版
+
+如果你想运行 2016 年或更早的旧版 Linux，请把 `guest_os` 改为 `linux_old`。
+这会启用 `vmware-svga` 显卡驱动，它在旧发行版上的支持更好。

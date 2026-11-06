@@ -1,0 +1,67 @@
+---
+title: 高级 quickget 功能
+description: quickget 的命令行参数，以及如何为 quickget 添加新操作系统
+sidebar:
+  order: 8
+---
+
+## 命令行参数
+
+以下是 `quickget` 的命令行参数。
+
+```text
+用法：
+  quickget <os> <release> [edition]
+  quickget ubuntu 22.04
+
+高级用法：
+  quickget <arg> [path] <os> [release] [edition]
+  quickget --download ubuntu 22.04
+
+参数：
+  --download      <os> <release> [edition] : 仅下载镜像，不生成虚拟机配置
+  --create-config <os> [path/url] [flags]  : 为某个系统镜像创建虚拟机配置
+  --open-homepage <os>                     : 打开该系统官网
+  --show          [os]                     : 显示系统信息
+  --version                                : 显示版本
+  --help                                   : 显示帮助信息
+------------------------------------ 标志 -------------------------------------
+--create-config:
+  --disable-unattended                     : 强制 quickget 不设置无人值守安装
+-------------------------- 用于测试与开发 ---------------------------
+  --url           [os] [release] [edition] : 显示镜像 URL
+  --check         [os] [release] [edition] : 校验镜像 URL
+  --list                                   : 列出所有支持的系统
+  --list-csv                               : 以 CSV 格式列出全部内容
+  --list-json                              : 以 JSON 格式列出全部内容
+--------------------------------------------------------------------------------
+```
+
+## 为 quickget 添加新操作系统
+
+下面是给 `quickget` 添加新系统的速成指南。
+
+1. 更新 `os_support()` —— 添加新系统，全部小写
+2. 更新 `os_info()` —— 填入新系统所有可能的字段，例如：
+
+```shell
+    <OS name>)     INFO="<OS nice name>|<OS based on>|<OS default login:pass if any>|<OS homepage>|<ABOUT>";;
+```
+
+3. 创建 `releases_newos()` 生成器（必需）—— 输出当前支持的发行版本，从最新开始
+4. 创建 `editions_newos()` 生成器（可选）—— 如果新系统有多种风味/版本，则输出各版本
+5. 更新 `make_vm_config()` —— 添加新系统所需的任何调整
+6. 创建 `get_newos()` 函数 —— 输出 ISO 的 URL 与 HASH。可参考其它已有函数，下面是一个简单示例：
+
+```shell
+function get_newos() {
+    local HASH=""
+    local ISO=""
+    local URL=""
+
+    ISO="newos-${RELEASE}-${EDITION}-amd64.iso"
+    URL="https://www.newos.org/download/${RELEASE}/${EDITION}"
+    HASH=$(web_pipe "${URL}/SHA512SUMS" | grep "${ISO}" | cut -d' ' -f 1)
+    echo "${URL}/${ISO} ${HASH}"
+}
+```

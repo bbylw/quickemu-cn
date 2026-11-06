@@ -1,0 +1,50 @@
+---
+title: 快速上手
+description: 两条命令创建并运行你的第一台虚拟机
+sidebar:
+  order: 2
+---
+
+安装好 Quickemu 之后，创建并运行一台虚拟机只需要两个简单步骤。
+
+## 步骤 1：生成配置
+
+`quickget` 会自动下载你要运行的操作系统的 ISO 镜像，并为该虚拟机生成配置文件。
+
+```shell
+quickget nixos unstable minimal
+```
+
+## 步骤 2：启动虚拟机
+
+`quickemu` 使用 `quickget` 生成的配置文件启动虚拟机。
+
+```shell
+quickemu --vm nixos-unstable-minimal.conf
+```
+
+就这样，你已经拥有了一台运行中的虚拟机 🎉
+
+## 查看更多用法
+
+执行 `quickget`（不带任何参数）可以查看所有支持的操作系统列表：
+
+```shell
+quickget
+```
+
+也可以查看某个系统的信息、镜像地址，或直接打开其官网：
+
+```shell
+quickget --show ubuntu 24.04     # 显示系统信息
+quickget --url ubuntu 24.04      # 显示镜像下载地址
+quickget --open-homepage ubuntu  # 打开系统官网
+```
+
+## 接下来
+
+- [创建 Linux 虚拟机](/docs/linux)
+- [创建 macOS 虚拟机](/docs/macos)
+- [创建 Windows 虚拟机](/docs/windows)
+- [高级 quickemu 配置](/docs/advanced-quickemu)
+- [高级 quickget 功能](/docs/advanced-quickget)

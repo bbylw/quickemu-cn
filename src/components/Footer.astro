@@ -14,8 +14,13 @@ const year = new Date().getFullYear();
 
 const docLinks = [
   { label: "简介", href: docsHref },
-  { label: "功能特性", href: featuresHref },
+  { label: "快速上手", href: withBase("/docs/quick-start", base) },
   { label: "安装指南", href: installHref },
+  { label: "功能特性", href: featuresHref },
+  { label: "创建 Linux 虚拟机", href: withBase("/docs/linux", base) },
+  { label: "创建 macOS 虚拟机", href: withBase("/docs/macos", base) },
+  { label: "创建 Windows 虚拟机", href: withBase("/docs/windows", base) },
+  { label: "高级配置", href: withBase("/docs/advanced-quickemu", base) },
 ];
 const resourceLinks = [
   { label: "GitHub 仓库", href: config.github, external: true },

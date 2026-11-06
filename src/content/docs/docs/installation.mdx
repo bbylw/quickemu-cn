@@ -1,38 +1,222 @@
 ---
 title: 安装指南
-description: 在你的系统上安装 Quickemu
+description: 在 Arch、Debian、Ubuntu、Fedora、macOS、Nix 上安装 Quickemu，或从源码构建
 sidebar:
-  order: 2
+  order: 1
 ---
 
-## 安装 Quickemu
+Quickemu 已进入以下发行版的软件仓库（打包状态来自 [Repology.org](https://repology.org/project/quickemu/versions)）。
 
-[安装 Quickemu](https://github.com/quickemu-project/quickemu/wiki/01-Installation) 后，只需两个简单步骤即可创建并运行虚拟机。
+## Arch Linux
 
-### 步骤 1：生成配置文件
-
-`quickget` 会自动下载你要运行的操作系统的 ISO 镜像，并为该虚拟机生成配置文件。
+Quickemu [![AUR 版本](https://repology.org/badge/version-for-repo/aur/quickemu.svg?header=)](https://repology.org/project/quickemu/versions) 可在 AUR（Arch 用户仓库）中获取，任何 AUR 助手都能安装。以 `yay` 为例：
 
 ```shell
-quickget nixos unstable minimal
+yay -Sy quickemu
 ```
 
-### 步骤 2：启动虚拟机
-
-`quickemu` 使用 `quickget` 生成的配置文件启动虚拟机。
+如果想要包含最新未发布修复（以及 bug）的滚动包：
 
 ```shell
-quickemu --vm nixos-unstable-minimal.conf
+yay -Sy quickemu.git
 ```
 
-执行 `quickget`（不带任何参数）即可查看所有支持的操作系统列表。
+## Debian 及其衍生版
 
-## 支持列表
+Quickemu 从 Debian 13（Trixie）起进入官方仓库。
 
-想查看完整支持的操作系统列表，可以直接运行：
+[![Debian Trixie](https://repology.org/badge/version-for-repo/debian_13/quickemu.svg)](https://repology.org/project/quickemu/versions) [![Debian Unstable](https://repology.org/badge/version-for-repo/debian_unstable/quickemu.svg)](https://repology.org/project/quickemu/versions)
+
+项目的 GitHub Releases 页面也提供了适用于 Debian 及其衍生版的 [.deb 包](https://github.com/quickemu-project/quickemu/releases)。下载后用 `apt-get` 安装：
 
 ```shell
-quickget
+sudo apt-get install ./quickemu_x.y.z-1_all.deb
 ```
 
-这会列出所有支持的 OS 及其版本。
+## Ubuntu
+
+Quickemu 从 `plucky`（25.04）起进入 Universe 仓库。
+
+[![Ubuntu 25.04](https://repology.org/badge/version-for-repo/ubuntu_25_04/quickemu.svg)](https://repology.org/project/quickemu/versions) [![Ubuntu 25.10](https://repology.org/badge/version-for-repo/ubuntu_25_10/quickemu.svg)](https://repology.org/project/quickemu/versions)
+
+Ubuntu 用户也可以通过 PPA 安装。在终端执行：
+
+```shell
+sudo apt-add-repository ppa:flexiondotorg/quickemu
+sudo apt update
+sudo apt install quickemu
+```
+
+`noble`（24.04）及更高版本的用户，如果尚未安装 `qemu-system-modules-spice`，需要补装：
+
+```shell
+sudo apt install qemu-system-modules-spice
+```
+
+## Fedora
+
+[![Fedora 42](https://repology.org/badge/version-for-repo/fedora_42/quickemu.svg)](https://repology.org/project/quickemu/versions) [![Fedora 43](https://repology.org/badge/version-for-repo/fedora_43/quickemu.svg)](https://repology.org/project/quickemu/versions) [![Fedora Rawhide](https://repology.org/badge/version-for-repo/fedora_rawhide/quickemu.svg)](https://repology.org/project/quickemu/versions)
+
+从 Fedora 41 起，Quickemu 已原生打包进 Fedora 仓库。
+
+```shell
+sudo dnf install quickemu
+```
+
+## macOS / Homebrew
+
+```shell
+brew tap quickemu-project/quickemu
+brew install quickemu
+```
+
+或安装最新的开发版：
+
+```shell
+brew install quickemu --HEAD
+```
+
+该 tap 也可配合 [nix-homebrew](https://github.com/zhaofengli/nix-homebrew) 使用，在 Nix 上以声明式方式管理 Homebrew。
+
+## Nix 与 NixOS
+
+### Flake
+
+[![FlakeHub](https://img.shields.io/endpoint?url=https://flakehub.com/f/quickemu-project/quickemu/badge)](https://flakehub.com/flake/quickemu-project/quickemu)
+
+Quickemu 的稳定版本已发布到 FlakeHub：
+
+- [https://flakehub.com/flake/quickemu-project/quickemu](https://flakehub.com/flake/quickemu-project/quickemu)
+
+### Nixpkgs
+
+把 Quickemu 加入你的 `systemPackages`，例如：
+
+```nix
+systemPackages = with pkgs; [
+  quickemu
+];
+```
+
+[![nixpkgs unstable](https://repology.org/badge/version-for-repo/nix_unstable/quickemu.svg)](https://repology.org/project/quickemu/versions) [![nixpkgs 25.05](https://repology.org/badge/version-for-repo/nix_stable_25_05/quickemu.svg)](https://repology.org/project/quickemu/versions) [![nixpkgs 24.11](https://repology.org/badge/version-for-repo/nix_stable_24_11/quickemu.svg)](https://repology.org/project/quickemu/versions)
+
+### Nix Shell
+
+也可以在 Nix shell 中快速试用 `quickemu`。
+
+新命令接口：
+
+```shell
+nix shell nixpkgs#quickemu
+```
+
+旧命令接口：
+
+```shell
+nix-shell -p quickemu
+```
+
+## 任意 Linux（从源码安装）
+
+```shell
+git clone --filter=blob:none https://github.com/quickemu-project/quickemu
+cd quickemu/docs
+sudo make install
+```
+
+从源码安装时，需要手动安装以下依赖：
+
+- [QEMU](https://www.qemu.org/)（*6.0.0 或更新*）**需启用 GTK、SDL、SPICE 与 VirtFS 支持**
+- [bash](https://www.gnu.org/software/bash/)（*4.0 或更新*）
+- [Coreutils](https://www.gnu.org/software/coreutils/)
+- [curl](https://curl.se/)
+- [EDK II](https://github.com/tianocore/edk2)
+- [gawk](https://www.gnu.org/software/gawk/)
+- [gptfdisk](https://www.rodsbooks.com/gdisk/)（*用于创建 macOS 虚拟机*）
+- [grep](https://www.gnu.org/software/grep/)
+- [glxinfo](https://gitlab.freedesktop.org/mesa/demos)
+- [jq](https://stedolan.github.io/jq/)
+- [mtools](https://www.gnu.org/software/mtools/)（*用于创建 macOS 虚拟机*）
+- [pciutils](https://github.com/pciutils/pciutils)
+- [procps](https://gitlab.com/procps-ng/procps)
+- [python3](https://www.python.org/)
+- [mkisofs](http://cdrtools.sourceforge.net/private/cdrecord.html)
+- [usbutils](https://github.com/gregkh/usbutils)
+- [util-linux](https://github.com/karelzak/util-linux)（含 `uuidgen`）
+- [sed](https://www.gnu.org/software/sed/)
+- [socat](http://www.dest-unreach.org/socat/)
+- [spicy](https://gitlab.freedesktop.org/spice/spice-gtk)
+- [swtpm](https://github.com/stefanberger/swtpm)
+- [xdg-user-dirs](https://www.freedesktop.org/wiki/Software/xdg-user-dirs/)
+- [xrandr](https://gitlab.freedesktop.org/xorg/app/xrandr)
+- [zsync](http://zsync.moria.org.uk/)
+- [unzip](http://www.info-zip.org/UnZip.html)
+
+### Debian 上安装依赖
+
+Trixie 及之后版本会由依赖自动处理。更早的版本（及其衍生版）：
+
+```shell
+sudo apt-get install bash coreutils curl gdisk genisoimage grep jq mesa-utils mtools ovmf pciutils procps python3 qemu sed socat spice-client-gtk swtpm-tools unzip usbutils util-linux uuidgen-runtime xdg-user-dirs xrandr zsync
+```
+
+### Fedora 上安装依赖
+
+Fedora 41 及之后已原生处理。更早的版本：
+
+```shell
+# 可能需要添加额外的软件源来获取某些包
+# 例如 zsync 已不在 Fedora 仓库中，可从 copr 获取
+# sudo dnf copr enable elxreno/zsync -y
+sudo dnf install bash coreutils curl edk2-tools gdisk genisoimage grep jq mesa-demos mtools pciutils procps python3 qemu sed socat spice-gtk-tools swtpm unzip usbutils util-linux xdg-user-dirs xrandr zsync
+```
+
+### Gentoo 上安装依赖
+
+请注意：视你的系统配置而定，可能需要使用 `sys-firmware/edk2-ovmf` 而非 `sys-firmware/edk2-ovmf-bin`。
+
+```shell
+sudo emerge --ask --noreplace app-emulation/qemu \
+ app-shells/bash \
+ sys-apps/coreutils \
+ net-misc/curl \
+ sys-firmware/edk2-ovmf \
+ sys-apps/gawk \
+ sys-apps/grep \
+ sys-apps/gptfdisk \
+ x11-apps/mesa-progs \
+ app-misc/jq \
+ sys-fs/mtools \
+ sys-apps/pciutils \
+ sys-process/procps \
+ app-cdr/cdrtools \
+ sys-apps/usbutils \
+ sys-apps/util-linux \
+ sys-apps/sed \
+ net-misc/socat \
+ app-emulation/spice \
+ app-crypt/swtpm \
+ x11-misc/xdg-user-dirs \
+ x11-apps/xrandr \
+ net-misc/zsync \
+ app-arch/unzip
+```
+
+## 在 macOS 上从源码安装
+
+先用 brew 安装依赖：
+
+```shell
+brew install bash cdrtools coreutils gptfdisk jq mtools python3 qemu usbutils samba sha3sum socat swtpm zsync
+```
+
+然后克隆项目：
+
+```shell
+git clone https://github.com/quickemu-project/quickemu
+cd quickemu
+```
+
+## 下一步
+
+安装完成后，请继续阅读[快速上手](/docs/quick-start)，或直接查看[创建 Linux 虚拟机](/docs/linux)。

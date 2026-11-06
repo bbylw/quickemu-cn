@@ -1,0 +1,447 @@
+---
+title: 高级 quickemu 配置
+description: quickemu 命令行参数、显示后端、文件共享、网络、USB 重定向、TPM 等
+sidebar:
+  order: 7
+---
+
+## 命令行参数
+
+以下是 `quickemu` 的命令行参数。
+
+```text
+用法
+  quickemu --vm ubuntu.conf <参数>
+
+参数
+  --access                          : 启用远程 SPICE 访问。'local'（默认）、'remote'、'clientipaddress'
+  --braille                         : 启用盲文支持。需要 SDL。
+  --delete-disk                     : 删除磁盘镜像与 EFI 变量
+  --delete-vm                       : 删除整个虚拟机及其配置
+  --display                         : 选择显示后端。'sdl'（默认）、'gtk'、'none'、'spice' 或 'spice-app'
+  --fullscreen                      : 以全屏模式启动虚拟机（Ctl+Alt+f 退出）
+  --ignore-msrs-always              : 配置 KVM 始终忽略未处理的机器特定寄存器
+  --shortcut                        : 创建桌面快捷方式
+  --snapshot apply <tag>            : 应用/恢复快照
+  --snapshot create <tag>           : 创建快照
+  --snapshot delete <tag>           : 删除快照
+  --snapshot info                   : 显示磁盘/快照信息
+  --status-quo                      : 不将任何更改提交到磁盘/快照
+  --viewer <viewer>                 : 选择替代查看器。选项：'spicy'（默认）、'remote-viewer'、'none'
+  --width <width>                   : 设置虚拟机屏幕宽度。没有 --height 时不生效
+  --height <height>                 : 设置虚拟机屏幕高度。没有 --width 时不生效
+  --ssh-port <port>                 : 手动设置 SSH 端口
+  --spice-port <port>               : 手动设置 SPICE 端口
+  --public-dir <path>               : 暴露共享目录。选项：''（默认：xdg-user-dir PUBLICSHARE）、'<directory>'、'none'
+  --monitor <type>                  : 设置监视器连接类型。选项：'socket'（默认）、'telnet'、'none'
+  --monitor-telnet-host <ip/host>   : 设置监视器的 telnet 主机（默认：'localhost'）
+  --monitor-telnet-port <port>      : 设置监视器的 telnet 端口（默认：'4440'）
+  --monitor-cmd <cmd>               : 若有可用监视器则发送命令（例如：system_powerdown）
+  --serial <type>                   : 设置串口连接类型。选项：'socket'（默认）、'telnet'、'none'
+  --serial-telnet-host <ip/host>    : 设置串口的 telnet 主机（默认：'localhost'）
+  --serial-telnet-port <port>       : 设置串口的 telnet 端口（默认：'6660'）
+  --keyboard <type>                 : 设置键盘。选项：'usb'（默认）、'ps2'、'virtio'
+  --keyboard_layout <layout>        : 设置键盘布局
+  --mouse <type>                    : 设置鼠标。选项：'tablet'（默认）、'ps2'、'usb'、'virtio'
+  --usb-controller <type>           : 设置 USB 控制器。选项：'ehci'（默认）、'xhci'、'none'
+  --sound-card <type>               : 设置声卡。选项：'intel-hda'（默认）、'ac97'、'es1370'、'sb16'、'none'
+  --extra_args <arguments>          : 向 qemu 传递额外参数
+  --version                         : 打印版本
+```
+
+## 连接到虚拟机
+
+### SPICE
+
+使用 SPICE 协议时可获得以下功能：
+
+- 客户机与宿主机之间的复制/粘贴
+- 宿主机与客户机之间的文件共享
+- USB 设备重定向
+
+要使用 SPICE，在 quickemu 命令中加入 `--display spice`，这要求安装 `spicy` 客户端（Debian/Ubuntu 中来自 `spice-client-gtk` 包）。
+
+```shell
+quickemu --vm ubuntu-22.04.conf --display spice
+```
+
+要在 Windows 客户机中启用复制/粘贴，请在客户机中安装 [SPICE Windows 客户机工具](https://www.spice-space.org/download.html)。
+
+### 无头模式
+
+若要以 SPICE 启动但不附加显示，使用 `--display none`。这需要安装 `spicy` 客户端（Debian/Ubuntu 中来自 `spice-client-gtk`）才能连接到运行中的虚拟机。
+
+```shell
+quickemu --vm ubuntu-22.04.conf --display none
+```
+
+你也可以用虚拟机目录下的 `.ports` 文件查询 SSH 与 SPICE 端口：
+
+```shell
+cat ubuntu-22.04/ubuntu-22.04.ports
+```
+
+例如，如果 SSH 端口是 22220，并假设虚拟机已启动 SSH 服务（具体因系统而异），通常可以从宿主机这样登录：
+
+```shell
+ssh -p 22220 your_vm_user@localhost
+```
+
+## 无障碍
+
+QEMU 支持通过 BrlAPI 在真实或虚拟设备上输出盲文。
+
+```shell
+quickemu --vm ubuntu-22.04.conf --braille --display sdl
+```
+
+## BIOS 与 EFI
+
+自 Quickemu 2.1.0 起，`efi` 是默认引导方式。若要改为传统 BIOS，请在虚拟机配置中加入：
+
+```shell
+boot="legacy"
+```
+
+## CPU、内存与磁盘
+
+默认情况下，Quickemu 会根据宿主机规格计算分配给虚拟机的 CPU 核心数与内存。
+你可以覆盖默认行为，按需调整虚拟机配置，加入以下任意行：
+
+- `cpu_cores="4"` —— 指定分配给虚拟机的 CPU 核心数
+- `ram="4G"` —— 指定分配给虚拟机的内存大小
+- `disk_size="16G"` —— 指定虚拟磁盘的大小
+
+### 磁盘预分配
+
+预分配模式（可选值：`off`（默认）、`metadata`、`falloc`、`full`）。预分配元数据的镜像初始更大，但当镜像需要增长时性能更好。
+
+在虚拟机配置中加入类似下面的一行，以指定创建系统盘时使用的预分配方式：
+
+```shell
+preallocation="metadata"
+```
+
+### CD-ROM 磁盘
+
+若想把宿主机的 ISO 镜像暴露给客户机，请在虚拟机配置中加入：
+
+```shell
+fixed_iso="/path/to/image.iso"
+```
+
+### 软盘
+
+如果你想在客户机中挂载软盘镜像（比如 [Alan Pope](https://popey.com)），请在虚拟机配置中加入：
+
+```shell
+floppy="/path/to/floppy.img"
+```
+
+## 显示分辨率
+
+`qemu` 总是默认在主显示器上显示虚拟机窗口。`quickemu` 请求的默认分辨率为 1280 x 800。
+可通过在虚拟机配置文件中设置 `width` 与 `height`，或传入 `--width` 与 `--height` 命令行参数来覆盖，例如：
+
+```shell
+quickemu --vm ubuntu-22.04-desktop.conf --width 1920 --height 1080
+```
+
+### 显示后端与 GPU 加速
+
+Quickemu 会根据客户机系统与 `--display` 选项选择显示设备。**并非所有组合都支持 GPU 加速（VirGL）。**
+
+通过 VirGL 实现 GPU 加速需要 `virtio-vga` 或 `virtio-vga-gl` 设备，它们只在特定显示后端下可用：
+
+| 客户机系统 | 显示后端 | GPU 设备 | VirGL 加速 |
+|---|---|---|---|
+| Linux | `sdl`（默认） | virtio-vga | 是 |
+| Linux | `gtk` | virtio-vga | 是 |
+| Linux | `spice-app` | virtio-vga | 是 |
+| Linux | `spice` | virtio-gpu | 否 |
+| Linux | `none` | virtio-gpu | 否 |
+| Windows | `sdl`（默认） | virtio-vga | 是 |
+| Windows | `cocoa` | virtio-vga | 是 |
+| Windows | `spice-app` | virtio-vga | 是 |
+| Windows | `gtk` | qxl-vga | 否 |
+| Windows | `spice` | qxl-vga | 否 |
+| macOS | 全部 | VGA | 否 |
+| BSD | 全部 | VGA | 否 |
+
+**建议**：要获得 Linux 客户机的最佳图形性能，请使用 `--display sdl`（默认）。如果你需要剪贴板共享、USB 重定向等 SPICE 功能，请注意 `--display spice` 会禁用 VirGL 加速。
+
+### 多显示器支持
+
+要启用多个虚拟显示器，请在虚拟机配置文件中加入 `max_outputs`：
+
+```shell
+max_outputs="2"
+```
+
+这会把虚拟 GPU 配置为最多支持指定数量的显示器。实际行为取决于你的显示后端与客户机系统的支持。
+
+### macOS 显示分辨率
+
+要在 macOS 上设置分辨率，你还需要在 macOS 虚拟机中安装第三方的分辨率管理工具以获得最佳效果。推荐使用以下之一：
+
+- [Resolutionator](https://manytricks.com/resolutionator)
+- [SwitchResX](https://www.madrau.com/)
+- [BetterDisplay](https://github.com/waydabber/BetterDisplay)（*需要 macOS 12.4 或更新*）
+
+## 文件共享
+
+所有文件共享选项都只会把当前用户的 `~/Public`（或本地化后的对应目录）暴露给客户机。
+
+### Samba
+
+支持 Linux、macOS 与 Windows 客户机。如果宿主机上有 `smbd`，Quickemu 会自动启用 QEMU 内置的 Samba 共享支持，把宿主机的共享暴露给客户机。
+
+在 Ubuntu 上可以这样安装最小的 Samba 组件：
+
+```shell
+sudo apt-get install --no-install-recommends samba
+```
+
+如果一切配置正确，启动虚拟机会打印 `smbd` 地址，例如：
+
+```text
+     - smbd:     On guest: smb://10.0.2.4/qemu
+```
+
+如果使用 Windows 客户机，右键点击“此电脑”，选择“添加一个网络位置”，粘贴该地址，去掉 `smb:` 并把正斜杠换为反斜杠（本例中为 `\\10.0.2.4\qemu`）。
+
+### SPICE WebDAV
+
+支持 Linux 与 Windows 客户机。
+
+（待补充）
+
+### VirtIO-9P
+
+支持 Linux 与 macOS 客户机。
+
+（待补充）
+
+## 网络
+
+Quickemu 会设置 User Networking，它在 QEMU 内提供完整的 TCP/IP 栈来实现虚拟 NAT 网络，默认网段为 (10.0.2.0/24)。
+在客户机内部，连接到“网关”IP 地址 10.0.2.2 的某个端口会连到宿主机上的该端口；例如 `ssh 10.0.2.2` 会从客户机 SSH 到宿主机。
+
+### 禁用网络
+
+要完全禁用客户机的所有网络接口，请在虚拟机配置中加入：
+
+```shell
+network="none"
+```
+
+自 Quickemu 4.9.5 起，也可以使用命令行参数 `--offline` 完全覆盖任何网络配置并禁用该虚拟机的网络。
+
+### 受限网络
+
+你可以用 restrict 选项把客户机与宿主机（以及更广的网络）隔离，这会把网络限制为仅在客户机与虚拟设备之间。
+
+这可以防止客户机内的软件“偷偷联网”，同时仍在客户机内提供网络。请在虚拟机配置中加入：
+
+```shell
+network="restrict"
+```
+
+### 桥接网络
+
+要把虚拟机连接到预先配置好的网络网桥，请在虚拟机配置中加入：
+
+```shell
+network="br0"
+```
+
+如果你希望桥接网络接口在客户机中拥有固定 MAC 地址，可以在虚拟机配置中加入 `macaddr`。QEMU 要求 MAC 地址位于以下范围：**52:54:00:AB:00:00 - 52:54:00:AB:FF:FF**
+
+因此可以这样指定：
+
+```text
+macaddr="52:54:00:AB:51:AE"
+```
+
+### 端口转发
+
+在虚拟机配置中加入一行，例如：
+
+```shell
+port_forwards=("8123:8123" "8888:80")
+```
+
+在上面的例子中：
+
+- 宿主机的 8123 端口转发到客户机的 8123 端口。
+- 宿主机的 8888 端口转发到客户机的 80 端口。
+
+## 剪贴板共享
+
+要在宿主机与客户机之间共享剪贴板，宿主机需使用 SPICE 查看器，客户机需安装 SPICE vdagent。
+
+### 宿主机
+
+用 `--display spice` 启动虚拟机，例如：
+
+```shell
+quickemu --vm nixos-23.11-gnome.conf --display spice
+```
+
+### 客户机
+
+越来越多的 Linux 发行版已在其 live 镜像中包含 SPICE vdagent。要在客户机中共享剪贴板，需要安装并运行 SPICE vdagent。
+
+**Debian 与 Ubuntu 上的 SPICE vdagent**
+
+```shell
+sudo apt-get install spice-vdagent
+```
+
+**NixOS 上的 SPICE vdagent**
+
+如果你使用 NixOS，需要启用 SPICE vdagent 守护进程，在配置中加入：
+
+```nix
+services.spice-vdagentd.enable = true;
+```
+
+**Windows 上的 SPICE vdagent**
+
+如果你是用 `quickget` 创建的 Windows 10 或 Windows 11 虚拟机，所需驱动已自动安装。
+
+## USB 重定向
+
+Quickemu 通过 SPICE 直通与主机直通支持 USB 重定向。
+
+<Aside type="caution">
+**注意！** 当 USB 设备从宿主机重定向后，在停止客户机重定向之前，宿主机操作系统将无法使用该设备。因此，不要重定向键盘、鼠标等输入设备，否则将很难（甚至无法）恢复。
+</Aside>
+
+### SPICE 重定向（推荐）
+
+使用 SPICE 做 USB 直通最简单，因为它不需要任何提升权限：
+
+来自 [spice-gtk](https://www.spice-space.org/spice-gtk.html) 的 `spicy`（*输入 → 选择要重定向的 USB 设备*）与来自 [virt-viewer](https://gitlab.com/virt-viewer/virt-viewer) 的 `remote-viewer`（*文件 → USB 设备选择*）都支持该功能。
+
+- 用 `--display spice` 启动 Quickemu，然后：
+- **`spicy`（默认）
+  - 从菜单中选择 `输入` → `选择要重定向的 USB 设备`，挑选要附加到客户机的设备。
+- **`remote-viewer`
+  - 从菜单中选择 `文件` → `USB 设备选择`，挑选要附加到客户机的设备。
+
+为确保功能正常，请确认已在虚拟机中安装必要的 SPICE Guest Tools。
+
+**在 NixOS 上启用 SPICE USB 重定向**
+
+如果在 NixOS 宿主机上遇到以下错误：
+
+```text
+Error setting facl: Operation not permitted
+```
+
+你需要在配置中启用 SPICE USB 重定向：
+
+```nix
+virtualisation.spiceUSBRedirection.enable = true;
+```
+
+### 主机重定向（*不推荐*）
+
+**不推荐使用 USB 主机重定向**；它只是为了向后兼容旧版 Quickemu 而保留。请优先使用上文所述的 SPICE 方式。
+
+在虚拟机配置中加入一行，例如：
+
+```shell
+usb_devices=("046d:082d" "046d:085e")
+```
+
+在上面的例子中：
+
+- vendor_id 为 `046d`、product_id 为 `082d` 的 USB 设备会暴露给客户机。
+- vendor_id 为 `046d`、product_id 为 `085e` 的 USB 设备会暴露给客户机。
+
+如果 USB 设备不可写，`quickemu` 会显示修改设备权限的相应命令，例如：
+
+```text
+     - USB:      Host pass-through requested:
+                  - Sennheiser Communications EPOS GTW 270 on bus 001 device 005 needs permission changes:
+                    sudo chown -v root:user /dev/bus/usb/001/005
+                    ERROR! USB permission changes are required 👆
+```
+
+## TPM
+
+自 Quickemu 2.2.0 起，可以为客户机添加软件模拟的 TPM 设备。
+只需在虚拟机配置中加入 `tpm="on"`；**`quickget` 会自动为 Windows 11 虚拟机添加这一行。**
+
+## 从同一系统管理多个虚拟机
+
+你可以从同一个下载的 ISO 镜像创建多个互相独立的虚拟机。每个虚拟机都需要自己的配置文件与磁盘镜像。
+
+### 创建额外的虚拟机
+
+1. 用一个新名称复制原配置文件：
+
+```shell
+cp ubuntu-24.04.conf ubuntu-24.04-testing.conf
+```
+
+2. 编辑新配置，使用不同的磁盘镜像路径：
+
+```shell
+guest_os="linux"
+disk_img="ubuntu-24.04-testing/disk.qcow2"
+iso="ubuntu-24.04/ubuntu-24.04.iso"
+```
+
+3. 为新虚拟机创建目录：
+
+```shell
+mkdir ubuntu-24.04-testing
+```
+
+4. 启动新虚拟机 —— quickemu 会创建一块全新的磁盘镜像：
+
+```shell
+quickemu --vm ubuntu-24.04-testing.conf
+```
+
+<Aside type="caution" title="重要">
+每个虚拟机必须有唯一的 `disk_img` 路径。ISO 可以在多个配置之间共享，因为安装期间它是只读的。
+</Aside>
+
+### 推荐的目录结构
+
+要管理同一系统的多个虚拟机，可以参考以下结构：
+
+```text
+~/quickemu/
+├── ubuntu-24.04/
+│   ├── ubuntu-24.04.iso      # 共享的 ISO
+│   └── disk.qcow2            # 主虚拟机磁盘
+├── ubuntu-24.04-dev/
+│   └── disk.qcow2            # 开发用虚拟机磁盘
+├── ubuntu-24.04-testing/
+│   └── disk.qcow2            # 测试用虚拟机磁盘
+├── ubuntu-24.04.conf         # 主虚拟机配置
+├── ubuntu-24.04-dev.conf     # 开发用虚拟机配置
+└── ubuntu-24.04-testing.conf # 测试用虚拟机配置
+```
+
+每个配置文件指向各自的磁盘镜像，同时共享同一个 ISO：
+
+```shell
+# ubuntu-24.04-dev.conf
+guest_os="linux"
+disk_img="ubuntu-24.04-dev/disk.qcow2"
+iso="ubuntu-24.04/ubuntu-24.04.iso"
+```
+
+## 桌面快捷方式
+
+可以为虚拟机创建桌面快捷方式，快捷方式保存在 `~/.local/share/applications`。示例如下：
+
+```shell
+quickemu --vm ubuntu-22.04-desktop.conf --shortcut
+```

@@ -1,0 +1,201 @@
+---
+title: macOS 宿主机的 3D 加速
+description: 在 macOS 宿主机上为虚拟机启用 GL/VirGL 3D 图形加速
+sidebar:
+  order: 10
+---
+
+本页介绍在 macOS 宿主机上为虚拟机启用 3D 图形加速。原版 QEMU 在 macOS 上不包含 OpenGL 支持，但可以通过打过补丁的构建版实现加速。
+
+## 现状
+
+**Homebrew 与 Nixpkgs 中的原版 QEMU 在 macOS 上缺少 OpenGL 支持。** 这是有意为之——这些包中的 OpenGL 依赖（libepoxy、virglrenderer）是针对 Linux 的。
+
+结果是：只能使用软件渲染，较慢但稳定。
+
+## macOS 上 3D 加速的原理
+
+macOS 已弃用 OpenGL，转向 Metal。要在 QEMU 中启用 GPU 加速：
+
+1. **ANGLE** 把 OpenGL ES 调用转换为 Metal
+2. **virglrenderer** 为虚拟机提供 VirGL 3D 支持
+3. **`gl=es`** 显示选项启用这条通路（**不是** `gl=on` 或 `gl=core`）
+
+这需要集成 ANGLE 的、打过补丁的 QEMU 与 virglrenderer 构建版。
+
+## GL 模式对比
+
+| 模式 | 后端 | 稳定性 | 性能 | 说明 |
+|---|---|---|---|---|
+| `gl=off` | 软件 | 稳定 | 慢 | 原版 QEMU 的默认值 |
+| `gl=core` | 原生 OpenGL.framework | 不稳定 | 不稳定 | macOS OpenGL 已弃用 |
+| `gl=es` | ANGLE/Metal | 稳定 | 快 | 可用时推荐 |
+
+## 如何获得带 GL 的 QEMU
+
+### 方案 A：Homebrew Tap（推荐）
+
+使用 Konstantin Nazarov 维护的 tap 是最简单的方法：
+
+```bash
+brew install knazarov/qemu-virgl/qemu-virgl
+```
+
+仓库：[https://github.com/knazarov/homebrew-qemu-virgl](https://github.com/knazarov/homebrew-qemu-virgl)
+
+### 方案 B：从源码构建
+
+构建需要 Akihiko Odaki 打过补丁的 fork。
+
+**依赖：**
+
+```bash
+brew install glib meson pipenv pixman pkg-config spice-protocol
+```
+
+**需要的仓库：**
+
+- QEMU：[https://github.com/akihikodaki/qemu](https://github.com/akihikodaki/qemu)
+- virglrenderer：[https://github.com/akihikodaki/virglrenderer](https://github.com/akihikodaki/virglrenderer)
+- libepoxy（带 macOS 支持）
+- ANGLE 库
+
+**配置参数：**
+
+```bash
+./configure \
+  --enable-cocoa \
+  --enable-opengl \
+  --enable-virglrenderer \
+  --enable-hvf \
+  --target-list=aarch64-softmmu,x86_64-softmmu
+```
+
+详细构建说明见 Odaki 的指南：[https://gist.github.com/akihikodaki/87df4149e7ca87f18dc56807ec5a1bc5](https://gist.github.com/akihikodaki/87df4149e7ca87f18dc56807ec5a1bc5)
+
+### 方案 C：UTM
+
+UTM 在一个 GUI 应用中打包了所有补丁与 ANGLE 库：
+
+[https://github.com/utmapp/UTM](https://github.com/utmapp/UTM)
+
+它预置了 GL 加速所需的一切，但提供的是图形界面而非命令行。
+
+## 构建带 VirGL 支持的 Nix 包
+
+在 macOS 上为带 GL 的 QEMU 创建自定义 Nix overlay，需要：
+
+1. 在 QEMU 的 derivation 中覆盖 `openGLSupport = true`
+2. 添加兼容 macOS 的依赖：
+   - libepoxy（带 macOS/ANGLE 支持）
+   - virglrenderer（来自 Odaki 的 fork 或使用他的补丁）
+   - ANGLE 库（libEGL.dylib、libGLESv2.dylib）
+3. 应用 Odaki 的 QEMU fork 中的补丁
+
+**注意：** 上游 QEMU 与 Nixpkgs 并未完全支持此配置。你需要：
+
+- 为 OpenGL ES 兼容性给 virglrenderer 打补丁
+- 确保 ANGLE 库在运行时可通过 `DYLD_LIBRARY_PATH` 获取，或安装到包前缀中
+
+补丁需求请参考 Odaki 仓库中的构建脚本。
+
+## Quickemu 的支持
+
+[PR #1812](https://github.com/quickemu-project/quickemu/pull/1812) 为 macOS 宿主机加入了自动 GL 检测与启用。
+
+**工作方式：**
+
+1. `check_cocoa_gl_es_support()` 测试 QEMU 是否接受 `gl=es`：
+   ```bash
+   qemu-system-* -display cocoa,gl=es -M none
+   ```
+2. 同时在这些位置检查 ANGLE 库（`libEGL.dylib`）：
+   - QEMU 的前缀目录（`<qemu-dir>/lib/`）
+   - Homebrew 位置（`/opt/homebrew/lib/`、`/usr/local/lib/`）
+   - `DYLD_LIBRARY_PATH` 中的条目
+3. 可用时自动使用 `gl=es`
+4. 原版 QEMU 构建版则回退到 `gl=off`
+
+**使用的显示设备：**
+
+| 客户机架构 | GL 设备 |
+|---|---|
+| x86_64 | `virtio-vga-gl` |
+| aarch64 | `virtio-gpu-gl-pci` |
+
+**诊断输出：**
+
+启用 GL 时，quickemu 会显示：
+
+```text
+ - Display:  COCOA, virtio-vga-gl, GL (es), VirGL (on) @ (1280 x 800)
+```
+
+回退到软件渲染时：
+
+```text
+ - Display:  COCOA, virtio-vga, GL (off), VirGL (off) @ (1280 x 800)
+```
+
+## 版本要求
+
+| 组件 | 最低 | 推荐 |
+|---|---|---|
+| QEMU | 6.0+ | 8.0+ 且带 Odaki 补丁 |
+| macOS | 11.0 (Big Sur) | 13.0+ (Ventura) |
+| virglrenderer | 0.9.0+ | Odaki fork 的最新版 |
+
+## 故障排查
+
+### "OpenGL support was not enabled in this build of QEMU"
+
+你正在使用不带 GL 支持的原版 QEMU。请安装带 GL 的构建版（见上方方案）。
+
+### 验证 GL 是否生效
+
+**从 quickemu 输出：**
+
+在显示状态行中查找 `GL (es)` 与 `VirGL (on)`。
+
+**在客户机内部：**
+
+```bash
+glxinfo | grep "OpenGL renderer"
+```
+
+应显示类似：
+
+```text
+OpenGL renderer string: virgl (ANGLE (Apple, Apple M2, OpenGL 4.1 Metal - 89.4))
+```
+
+### 客户机仍显示软件渲染
+
+1. 确认 ANGLE 库可访问：
+   ```bash
+   ls -la /opt/homebrew/lib/libEGL.dylib  # Homebrew 位置
+   ```
+
+2. 检查 QEMU 是否接受 `gl=es`：
+   ```bash
+   qemu-system-aarch64 -display cocoa,gl=es -M none
+   ```
+   没有错误输出即表示支持 GL。
+
+3. 确保客户机安装了带 virgl 支持的 Mesa。
+
+### 启用 GL 后性能仍然很差
+
+- 确认使用的是 `gl=es`，而不是 `gl=core`
+- 在「活动监视器」中查看 GPU 占用——Metal 应有活动
+- 某些客户机可能需要更新 Mesa 驱动以获得最佳 virgl 性能
+
+## 参考
+
+- Akihiko Odaki 的指南：[https://gist.github.com/akihikodaki/87df4149e7ca87f18dc56807ec5a1bc5](https://gist.github.com/akihikodaki/87df4149e7ca87f18dc56807ec5a1bc5)
+- Odaki 的 QEMU Fork：[https://github.com/akihikodaki/qemu](https://github.com/akihikodaki/qemu)
+- Odaki 的 virglrenderer Fork：[https://github.com/akihikodaki/virglrenderer](https://github.com/akihikodaki/virglrenderer)
+- Homebrew Tap：[https://github.com/knazarov/homebrew-qemu-virgl](https://github.com/knazarov/homebrew-qemu-virgl)
+- UTM 项目：[https://github.com/utmapp/UTM](https://github.com/utmapp/UTM)
+- ANGLE 项目：[https://chromium.googlesource.com/angle/angle](https://chromium.googlesource.com/angle/angle)
+- Quickemu PR #1812：[https://github.com/quickemu-project/quickemu/pull/1812](https://github.com/quickemu-project/quickemu/pull/1812)

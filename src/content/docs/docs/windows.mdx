@@ -1,0 +1,164 @@
+---
+title: 创建 Windows 虚拟机
+description: 自动创建 Windows 10/11 与 Server 客户机，含系统要求、无人值守安装定制与已知问题
+sidebar:
+  order: 6
+---
+
+## 自动创建 Windows 客户机
+
+`quickget` 可以自动下载 [**Windows 10**](https://www.microsoft.com/software-download/windows10) 与 [**Windows 11**](https://www.microsoft.com/software-download/windows11)，并生成经过优化的虚拟机配置。
+该配置还包含 [Windows 版 VirtIO 驱动](https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/)。
+
+`quickget` 也能下载 Windows Server [2016](https://www.microsoft.com/en-us/evalcenter/download-windows-server-2016)、[2019](https://www.microsoft.com/en-us/evalcenter/download-windows-server-2019) 与 [2022](https://www.microsoft.com/en-us/evalcenter/download-windows-server-2022)。
+
+<Aside type="note">
+Windows Server **没有**自动安装，也**不会**自动配置 VirtIO，它使用模拟的 IDE 磁盘与 Intel E1000 网卡。
+</Aside>
+
+```shell
+quickget windows 11
+quickemu --vm windows-11.conf
+```
+
+- 像平常一样完成安装。
+- 所有相关驱动与服务应会自动安装。
+- 会自动创建一个本地管理员账户，凭据如下：
+  - 用户名：`Quickemu`
+  - 密码：`quickemu`
+
+**区域版本**
+
+默认情况下 `quickget` 下载 *"English International"*（Server 版为 *"English (United States)"*），但你可以指定支持的其它语言，例如：
+
+```shell
+quickget windows 11 "Chinese (Traditional)"
+```
+
+默认的 Windows 11 配置如下：
+
+```shell
+guest_os="windows"
+disk_img="windows-11/disk.qcow2"
+iso="windows-11/windows-11.iso"
+fixed_iso="windows-11/virtio-win.iso"
+tpm="on"
+secureboot="off"
+```
+
+- `guest_os="windows"` 告诉 `quickemu` 针对 Windows 优化。
+- `fixed_iso=` 指定提供 VirtIO 驱动的 ISO 镜像。
+- `tpm="on"` 告诉 `quickemu` 使用 `swtpm` 创建一个软件模拟的 TPM 设备。
+
+## Windows 11 系统要求
+
+Windows 11 的硬件要求比以往版本更严格。微软要求：
+
+- **至少 2 个 CPU 核心**（1 GHz 或更快）
+- 至少 4 GB 内存
+- TPM 2.0
+- 支持 Secure Boot
+
+### CPU 核心要求
+
+从 quickemu 4.9.7 起，Windows 11 客户机会自动获得至少 2 个 CPU 核心，即使宿主机资源有限也是如此。这可以避免因 Windows 11 检测到少于 2 个核心而导致的安装失败。
+
+你仍可以在配置文件中通过 `cpu_cores` 分配更多核心：
+
+```shell
+cpu_cores="4"
+```
+
+实现细节见 [PR #1797](https://github.com/quickemu-project/quickemu/pull/1797)。
+
+## 定制 Windows 虚拟机的启动
+
+`quickget` 下载 Windows 10 或 11 时会创建一个无人值守安装，自动配置虚拟机。你可以通过修改 `autounattend.xml` 来自定义这一过程。
+
+### 添加自定义启动脚本
+
+无人值守安装包含一个 `FirstLogonCommands` 段，会在首次用户登录后运行命令。要添加你自己的脚本：
+
+1. 在虚拟机目录中找到无人值守文件：
+
+```shell
+ls windows-11/unattended/
+```
+
+2. 编辑 `autounattend.xml`，找到 `FirstLogonCommands` 段（在文件末尾附近）
+
+3. 添加你的自定义命令。每条命令需要一个 `Order` 编号（数字越大越晚执行）：
+
+```xml
+<FirstLogonCommands>
+  <!-- 已有命令在这里，Order 为 1-7 -->
+
+  <SynchronousCommand wcm:action="add">
+    <CommandLine>powershell -ExecutionPolicy Bypass -File F:\setup.ps1</CommandLine>
+    <Description>Run custom setup script</Description>
+    <Order>8</Order>
+  </SynchronousCommand>
+</FirstLogonCommands>
+```
+
+4. 把你的脚本放进 `unattended/` 目录，以便随 ISO 一起打包
+
+5. 重新生成无人值守 ISO：
+
+```shell
+mkisofs -quiet -J -o windows-11/unattended.iso windows-11/unattended/
+```
+
+### 盘符对照
+
+Windows 安装过程中，各盘的分配如下：
+
+- **C:** —— Windows 系统盘
+- **E:** —— VirtIO 驱动 ISO（`virtio-win.iso`）
+- **F:** —— 无人值守配置 ISO（`unattended.iso`）
+
+### 关闭无人值守安装
+
+如果希望改为手动安装 Windows：
+
+```shell
+quickget windows 11 --disable-unattended
+```
+
+这会跳过创建 `autounattend.xml` 及相关文件，让你在安装过程中手动配置 Windows。
+
+### 从头开始
+
+在做过修改之后，要重新生成默认的无人值守配置：
+
+1. 删除现有的无人值守文件：
+
+```shell
+rm -rf windows-11/unattended/ windows-11/unattended.iso
+```
+
+2. 重新运行 quickget（它会重新创建无人值守文件）：
+
+```shell
+quickget windows 11
+```
+
+## 已知问题
+
+### SPICE 显示会导致卡死
+
+Windows 10 与 Windows 11 客户机在使用 `--display spice` 时，可能在启动约 20 秒后卡死。卡死通常发生在与虚拟机交互时，例如打开文件或浏览器。
+
+**规避方法**：改用默认的 SDL 显示，而不是 SPICE：
+
+```shell
+# 这样会卡死：
+quickemu --vm windows-11.conf --display spice
+
+# 改用这个：
+quickemu --vm windows-11.conf
+```
+
+**代价**：使用 SDL 显示时，将无法进行窗口缩放，也无法使用 SPICE 专有功能（剪贴板共享、通过 SPICE 的 USB 重定向）。
+
+这似乎更像是上游 SPICE/QEMU 的限制，而非 quickemu 的 bug。详见 [issue #1670](https://github.com/quickemu-project/quickemu/issues/1670)。
