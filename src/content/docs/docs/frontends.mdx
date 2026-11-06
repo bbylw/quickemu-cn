@@ -5,21 +5,25 @@ sidebar:
   order: 9
 ---
 
+`quickemu` 与 `quickget` 是为终端设计的，但也可以使用图形界面。
+
 ## Quickgui
 
-`quickemu` 与 `quickget` 是为终端设计的，但也可以使用图形界面：
+**[Quickgui](https://github.com/quickemu-project/quickgui)** 是 Quickemu 的桌面图形管理器，支持近 1000 个操作系统，提供自动下载与配置。
 
-- **[Quickgui](https://github.com/quickemu-project/quickgui)**，作者 [Mark Johnson](https://github.com/marxjohnson) 与 [Yannick Mauray](https://github.com/ymauray)。
+详细安装与使用说明见 [Quickgui 图形界面](/docs/quickgui)。
 
-[![打包状态](https://repology.org/badge/vertical-allrepos/quickgui.svg?header=quickgui)](https://repology.org/project/quickgui/versions)
+## Quickemu 图标
 
-在 Ubuntu 上安装 Quickgui：
+感谢 [Luke Wesley-Holley](https://github.com/Lukewh) 制作了 **[Quickemu 图标](https://github.com/Lukewh/quickemu-icons)** 🎨
 
-```shell
-sudo add-apt-repository ppa:flexiondotorg/quickemu
-sudo apt update
-sudo apt install quickgui
-```
+这些图标可用于虚拟机的桌面快捷方式（`.desktop` 文件）等场景。详见 [Quickemu 图标](/docs/quickemu-icons)。
 
-感谢 [Luke Wesley-Holley](https://github.com/Lukewh) 与 [Philipp Kiemle](https://github.com/daPhipz) 制作了
-**[Quickemu 图标](https://github.com/Lukewh/quickemu-icons)** 🎨
+## 其他生态项目
+
+除了前端与图标，Quickemu 项目还包括：
+
+- [Quicktest 自动化测试](/docs/quicktest) —— 在虚拟机中自动运行测试用例
+- [Quickget 配置仓库](/docs/quickget-configs) —— `quickget` 使用的 JSON 配置，每日更新
+- [Homebrew Tap](/docs/homebrew) —— 通过 Homebrew 在 macOS 上安装
+- [macOS Apple ID 支持](/docs/mac-apple-id) —— 修改 OpenCore 引导镜像以启用 Apple ID

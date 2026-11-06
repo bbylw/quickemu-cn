@@ -1,0 +1,41 @@
+---
+title: Quickemu 图标
+description: Quickemu 项目为各操作系统提供的虚拟机图标集
+sidebar:
+  order: 15
+---
+
+**[Quickemu 图标](https://github.com/Lukewh/quickemu-icons)** 是一套操作系统图标，供 Quickemu 虚拟机的桌面文件（`.desktop`）等场景使用。
+
+图标由 [Luke Wesley-Holley](https://github.com/Lukewh) 制作，覆盖了 Quickemu 支持的众多操作系统。
+
+## 获取图标
+
+- 从 [Releases 页面](https://github.com/Lukewh/quickemu-icons/releases)下载优化后的版本
+- 在线浏览全部可用图标：[quickemu-project.github.io/quickemu-icons](https://quickemu-project.github.io/quickemu-icons/)
+
+## 提供哪些格式
+
+每个系统通常同时提供 PNG 与 SVG 两种格式，方便在不同场景选用：
+
+- **SVG** —— 矢量格式，任意缩放不失真，适合现代桌面环境
+- **PNG** —— 位图格式，兼容性更好，适合旧环境或不支持 SVG 的启动器
+
+## 使用场景
+
+给虚拟机创建桌面快捷方式时，把图标指向对应系统的图片文件即可：
+
+```ini
+[Desktop Entry]
+Type=Application
+Name=Windows 11
+Exec=quickemu --vm windows-11.conf
+Icon=/path/to/quickemu-icons/windows-11.png
+Terminal=false
+```
+
+## 相关链接
+
+- [Quickemu 图标仓库](https://github.com/Lukewh/quickemu-icons)
+- [图标预览站](https://quickemu-project.github.io/quickemu-icons/)
+- [Quickgui 图形界面](/docs/quickgui)

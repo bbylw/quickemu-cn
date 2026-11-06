@@ -1,0 +1,58 @@
+---
+title: Quickgui 图形界面
+description: Quickemu 的桌面图形管理器，支持近 1000 个操作系统
+sidebar:
+  order: 12
+---
+
+**[Quickgui](https://github.com/quickemu-project/quickgui)** 是 Quickemu 的图形界面，让你通过简洁直观的界面创建和管理虚拟机，不必记命令行参数。
+
+支持近 1000 个操作系统，包括 Windows、macOS、各种 BSD 和数百个 Linux 发行版，全部支持自动下载与配置。
+
+## 安装
+
+Quickgui 依赖 Quickemu。大多数包管理器在安装 Quickgui 时会自动安装 Quickemu；如果尚未安装，请先参考[安装指南](/docs/installation)。
+
+### Debian
+
+从 [Releases 页面](https://github.com/quickemu-project/quickgui/releases)下载最新的 `.deb` 包，然后安装：
+
+```shell
+sudo apt-get install ./quickgui-1.2.10+1-linux.deb
+```
+
+### Fedora
+
+从 [Releases 页面](https://github.com/quickemu-project/quickgui/releases)下载最新的 `.rpm` 包并安装。
+
+### NixOS
+
+**Flake 方式**：稳定版本发布在 [FlakeHub](https://flakehub.com/flake/quickemu-project/quickgui)。
+
+**Nixpkgs 方式**：把 Quickgui 加入 `systemPackages`：
+
+```nix
+systemPackages = with pkgs; [
+  quickgui
+];
+```
+
+### Ubuntu
+
+```shell
+sudo add-apt-repository ppa:flexiondotorg/quickemu
+sudo apt update
+sudo apt install quickgui
+```
+
+## 与终端工具的关系
+
+Quickgui 只是 Quickemu 的前端。它调用的仍是 `quickget` 与 `quickemu`，因此两者创建的虚拟机完全互通：命令行创建的虚拟机可以在 Quickgui 里打开，反之亦然。
+
+> 终端优先的用户可以直接使用 `quickget` + `quickemu`，参见[快速上手](/docs/quick-start)。
+
+## 相关链接
+
+- [Quickgui 仓库](https://github.com/quickemu-project/quickgui)
+- [打包状态](https://repology.org/project/quickgui/versions)
+- [Quickemu 图标](https://github.com/Lukewh/quickemu-icons)

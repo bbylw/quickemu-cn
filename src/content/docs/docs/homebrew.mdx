@@ -1,0 +1,51 @@
+---
+title: Homebrew Tap
+description: 通过 Homebrew 在 macOS 上安装 quickemu
+sidebar:
+  order: 16
+---
+
+**[homebrew-quickemu](https://github.com/quickemu-project/homebrew-quickemu)** 是 Quickemu 官方的 [Homebrew](https://brew.sh/) tap，主要面向 macOS 用户。
+
+## 安装
+
+```bash
+brew tap quickemu-project/quickemu
+brew install quickemu
+```
+
+## 可用 Formula
+
+| Formula | 说明 |
+|---|---|
+| `quickemu` | 快速创建并运行经过优化的 Windows、macOS 与 Linux 虚拟机 |
+
+## 与 nix-homebrew 配合
+
+这个 tap 遵循标准的 Homebrew 命名约定（`homebrew-<name>`），因此可以与 [nix-homebrew](https://github.com/zhaofengli/nix-homebrew) 配合，在 NixOS / nix-darwin 上以声明式方式管理 Homebrew。
+
+把 tap 加入 flake inputs：
+
+```nix
+{
+  inputs = {
+    nix-homebrew.url = "github:zhaofengli/nix-homebrew";
+    quickemu-tap = {
+      url = "github:quickemu-project/homebrew-quickemu";
+      flake = false;
+    };
+  };
+}
+```
+
+## 提示
+
+Homebrew 安装的是 Quickemu 本体（`quickget` 与 `quickemu` 命令）。图形界面请另行安装 [Quickgui](/docs/quickgui)。
+
+> 在 Apple Silicon 上运行 x86_64 客户机时，性能取决于 QEMU 的软件模拟，会比在 Intel Mac 上慢。参见 [macOS 客户机](/docs/macos)。
+
+## 相关链接
+
+- [homebrew-quickemu 仓库](https://github.com/quickemu-project/homebrew-quickemu)
+- [Homebrew 官网](https://brew.sh/)
+- [nix-homebrew](https://github.com/zhaofengli/nix-homebrew)

@@ -1,0 +1,44 @@
+---
+title: macOS Apple ID 支持
+description: 修改 OpenCore 引导镜像，让 macOS 虚拟机可以使用 Apple ID
+sidebar:
+  order: 17
+---
+
+**[qe_mac_apid](https://github.com/quickemu-project/qe_mac_apid)** 是一个小工具，用于修改 OpenCore QCOW2 引导镜像中的配置，从而让 macOS 虚拟机能够登录 Apple ID（App Store、iCloud 等）。
+
+它主要为 Quickemu 设计，但对其他工具创建的虚拟机也可能有效。
+
+> 修改引导镜像属于进阶操作。若只是想运行 macOS，参见 [macOS 客户机](/docs/macos)，通常不需要这一步。
+
+## 安装
+
+从 [Releases 页面](https://github.com/quickemu-project/qe_mac_apid/releases)下载预编译二进制文件；如果已安装 Rust，也可以从源码构建。
+
+## 用法
+
+把引导文件（`OpenCore.qcow2`）的路径作为参数传入：
+
+```bash
+qe_mac_apid --bootloader /path/to/OpenCore.qcow2
+```
+
+运行后程序会引导你访问 Apple 的「Check Coverage」网页，并给出一组序列号。你需要在网页上逐个验证，直到找到一个「验证时报错」的序列号（这正是可用状态），然后输入 `y` 确认。
+
+程序随后会自动把以下信息写入引导镜像内的 `config.plist`：
+
+- 新的序列号（serial number）
+- 主板序列号（board serial number）
+- 随机生成的 UUID
+- 随机生成的 MAC 地址
+
+## 注意事项
+
+- 更换序列号会改变虚拟机的「硬件身份」，请自行评估合规性
+- 操作前**务必备份** `OpenCore.qcow2`
+- Apple ID 登录可能受地区、账号状态等因素影响，工具无法保证一定成功
+
+## 相关链接
+
+- [qe_mac_apid 仓库](https://github.com/quickemu-project/qe_mac_apid)
+- [创建 macOS 虚拟机](/docs/macos)

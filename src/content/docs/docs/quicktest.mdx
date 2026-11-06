@@ -1,0 +1,66 @@
+---
+title: Quicktest 自动化测试
+description: 在 Quickemu 虚拟机中自动测试操作系统，模拟按键并用 OCR 读取屏幕
+sidebar:
+  order: 13
+---
+
+**[Quicktest](https://github.com/quickemu-project/quicktest)** 是一个配套工具，用于在 Quickemu 虚拟机中自动运行测试用例。它通过注入按键操作、并用 [Tesseract OCR](https://github.com/tesseract-ocr/tesseract) 读取屏幕内容，来判断系统是否按预期工作。
+
+## 用途
+
+Quicktest 最初的目标是自动化一部分「发布前由志愿者手动完成」的测试工作，但它的用途并不局限于此。
+
+它适合：
+
+- 验证某个操作系统镜像能否正常安装并启动
+- 在多个发行版之间做回归对比
+- 为 CI 流程提供无人值守的虚拟机测试
+
+## 依赖
+
+除 Quickemu 外，Quicktest 还需要 `qemu`、`ffmpeg`、`socat`、`convert`（来自 ImageMagick）和 `tesseract`：
+
+```shell
+sudo apt install socat ffmpeg imagemagick tesseract-ocr
+```
+
+如果需要识别非英语界面，还要安装对应的语言包，例如法语：
+
+```shell
+sudo apt install tesseract-ocr-fra
+```
+
+## 快速开始
+
+1. 按[安装指南](/docs/installation)安装 Quickemu **4.9.3 或更新版本**
+2. 安装 Tesseract OCR 及所需语言包
+3. 克隆仓库：
+
+   ```shell
+   git clone https://github.com/quickemu-project/quicktest
+   ```
+
+4. 运行一个测试用例。下面这条命令会下载 Alpine Linux 的 ISO、启动虚拟机，然后执行自动化测试：
+
+   ```shell
+   ./quicktest --vm alpine
+   ```
+
+> 首次运行需要下载镜像，耗时取决于网络速度。
+
+## 演示
+
+- [视频介绍（约 6 分钟）](https://www.youtube.com/watch?v=jAvEgBWedOM)
+- [asciinema 终端演示](https://asciinema.org/a/V7bgjMrx0omiGzKgJOwIJFZqb)
+- [测试过程截图的时间延时视频](https://www.youtube.com/watch?v=sDBB7G9ht5E)
+
+## 设计目标
+
+- 提供工具，让爱好者能自动化一部分 Linux 社区的操作系统测试
+- 建立一套易懂、易维护的测试用例
+- 让熟悉技术的爱好者能开发并贡献新测试
+
+## 相关链接
+
+- [Quicktest 仓库](https://github.com/quickemu-project/quicktest)

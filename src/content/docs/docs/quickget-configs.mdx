@@ -1,0 +1,103 @@
+---
+title: Quickget 配置仓库
+description: quickget 使用的 JSON 配置文件，每天自动更新
+sidebar:
+  order: 14
+---
+
+**[quickget_configs](https://github.com/quickemu-project/quickget_configs)** 是一个每日更新（UTC 0:00）的仓库，以 JSON 格式发布创建虚拟机所需的全部信息，供 `quickget` 使用。
+
+简单说：**你执行 `quickget <系统> <版本>` 时，它要下载哪个镜像、用哪种启动方式、是否需要 TPM、分配多少内存 —— 这些规则就来自这里。**
+
+## 数据格式
+
+每个操作系统条目包含以下字段：
+
+```json
+{
+  "os": "os_name",
+  "pretty_name": "OS Name",
+  "homepage": "https://os.homepage",
+  "description": "A description of the OS",
+  "releases": [ release ]
+}
+```
+
+其中 `homepage` 与 `description` 为可选字段。
+
+## 发行版条目
+
+`releases` 数组中的每一项描述一个具体版本：
+
+```json
+{
+  "release": "release_name",
+  "edition": "edition_name",
+  "guest_os": "guest_os",
+  "arch": "arch",
+  "iso": [ Source ],
+  "img": [ Source ],
+  "fixed_iso": [ Source ],
+  "floppy": [ Source ],
+  "disk_images": [ Disk ],
+  "boot_type": "boot_type",
+  "tpm": true,
+  "ram": 4294967296
+}
+```
+
+字段说明：
+
+- `release`、`edition`、`boot_type`、`tpm`、`ram` 为可选
+- `guest_os` 在值为 `Linux` 时省略
+- `arch` 在值为 `x86_64` 时省略
+- `ram` 单位为字节
+
+## 磁盘与来源
+
+`disk_images` 数组描述要附加的磁盘：
+
+```json
+{
+  "source": Source,
+  "size": 4294967296,
+  "format": "format"
+}
+```
+
+`size` 与 `format` 为可选字段，`size` 单位为字节。
+
+`Source` 是一个 tagged union，可以是以下形式之一：
+
+```json
+{
+  "web": WebSource,
+  "file_name": "String",
+  "custom": "..."
+}
+```
+
+`WebSource` 描述网络来源：
+
+```json
+{
+  "url": "https://source.url",
+  "checksum": "checksum",
+  "archive_format": "archive_format",
+  "file_name": "file_name"
+}
+```
+
+其中 `checksum`、`archive_format`、`file_name` 均为可选。
+
+## 为什么有用
+
+- **不需要联网查询**：配置是静态 JSON，可以直接在本地读取或做离线分析
+- **便于校验**：想知道某个系统用什么镜像、是否需要 TPM，直接查 JSON 即可
+- **贡献新系统**：给 `quickget` 添加新操作系统时，改动就落在这个仓库里
+
+想给 `quickget` 添加新系统，参见[高级 quickget 功能](/docs/advanced-quickget)。
+
+## 相关链接
+
+- [quickget_configs 仓库](https://github.com/quickemu-project/quickget_configs)
