@@ -33,7 +33,10 @@ const prevNext = await getPrevNext(currentSlug, {
 });
 // Pass `collection` so versioned pages (docs-<v>) get version-prefixed
 // breadcrumb hrefs — parity with the getSidebar call above.
-const breadcrumbs = await getBreadcrumbs(currentSlug, { collection: entry.collection });
+const breadcrumbs = await getBreadcrumbs(currentSlug, {
+  collection: entry.collection,
+  root: { label: "首页", href: "/" },
+});
 const editUrl = await getEditUrl(entry);
 // Frontmatter wins; git is the fallback.
 const lastUpdated = entry.data.lastUpdated ??

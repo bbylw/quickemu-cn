@@ -1,0 +1,73 @@
+---
+/**
+ * Footer — 落地页与文档页共用的站点页脚。
+ */
+import { withBase } from "@cloudflare/nimbus-docs/runtime";
+import { config } from "virtual:nimbus/config";
+
+const base = import.meta.env.BASE_URL;
+const homeHref = withBase("/", base);
+const docsHref = withBase("/docs", base);
+const installHref = withBase("/docs/installation", base);
+const featuresHref = withBase("/docs/features", base);
+const year = new Date().getFullYear();
+
+const docLinks = [
+  { label: "简介", href: docsHref },
+  { label: "功能特性", href: featuresHref },
+  { label: "安装指南", href: installHref },
+];
+const resourceLinks = [
+  { label: "GitHub 仓库", href: config.github, external: true },
+  { label: "QEMU 官网", href: "https://www.qemu.org/", external: true },
+  { label: "项目 Wiki", href: "https://github.com/quickemu-project/quickemu/wiki", external: true },
+];
+---
+
+<footer class="border-t border-border bg-muted/40">
+  <div class="mx-auto max-w-6xl px-6 py-14">
+    <div class="grid gap-10 sm:grid-cols-2 md:grid-cols-4">
+      <div class="md:col-span-2 md:max-w-sm">
+        <a href={homeHref} class="inline-flex items-center gap-2 font-semibold text-foreground no-underline">
+          <img src={withBase("/images/logo.png", base)} alt="" class="h-6 w-auto" />
+          <span>{config.title}</span>
+        </a>
+        <p class="mt-3 text-sm leading-6 text-muted-foreground">
+          Quickemu 是 QEMU 的一层封装，自动为 Windows、macOS 与 Linux 创建并运行经过优化的虚拟机。
+        </p>
+      </div>
+
+      <div>
+        <h2 class="text-sm font-semibold text-foreground">文档</h2>
+        <ul class="mt-3 space-y-2 text-sm">
+          {docLinks.map((l) => (
+            <li>
+              <a href={l.href} class="text-muted-foreground no-underline transition-colors hover:text-foreground">{l.label}</a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div>
+        <h2 class="text-sm font-semibold text-foreground">资源</h2>
+        <ul class="mt-3 space-y-2 text-sm">
+          {resourceLinks.map((l) => (
+            <li>
+              <a
+                href={l.href}
+                class="text-muted-foreground no-underline transition-colors hover:text-foreground"
+                target="_blank"
+                rel="noopener"
+              >{l.label}</a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+
+    <div class="mt-12 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-6 text-xs text-muted-foreground">
+      <span>© {year} Quickemu 项目 · 本文档内容基于上游 README 翻译整理</span>
+      <span>使用 Nimbus · Astro · Tailwind CSS 构建</span>
+    </div>
+  </div>
+</footer>

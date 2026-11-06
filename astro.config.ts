@@ -17,9 +17,11 @@ const nimbusConfig = defineNimbusConfig({
   // 仓库地址：显示在页头的 GitHub 链接。
   github: "https://github.com/quickemu-project/quickemu",
   socialImageAlt: "Quickemu 中文文档预览",
-  // The home page leads the sidebar; every other page joins it automatically.
+  // 文档统一挂在 /docs 下；根路径 / 由独立落地页（src/pages/index.astro）占用。
   sidebar: {
-    items: ["index", { autogenerate: { collection: "docs" } }],
+    items: [{ label: "文档", autogenerate: { collection: "docs" } }],
+    indexDisplay: "overview-leaf",
+    overviewLabel: "概览",
   },
 });
 
@@ -59,8 +61,6 @@ export default defineConfig({
         // read as attributes too; remove this to keep it as text.
         features: { headingAttributes: true },
       },
-      // 在 Windows 环境下 Pagefind 进程启动存在兼容问题，暂时关闭站内搜索
-      search: false,
     }),
   ],
 });

@@ -13,7 +13,8 @@
     "prepreview:cf": "astro build",
     "preview:cf": "wrangler dev",
     "predeploy": "astro check && astro build",
-    "deploy": "wrangler deploy"
+    "deploy": "wrangler deploy",
+    "prebuild": "node scripts/setup-pagefind.mjs"
   },
   "dependencies": {
     "@cloudflare/nimbus-docs": "^0.19.3",

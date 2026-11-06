@@ -1,0 +1,260 @@
+---
+/**
+ * 落地页 —— 根路由 `/`。
+ *
+ * 独立于文档布局：没有侧边栏与目录栏，只保留页头与页脚，
+ * 面向第一次接触 Quickemu 的访客；文档统一挂在 /docs 下。
+ */
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import { LinkButton } from "../components/ui/link-button";
+import Icon from "@cloudflare/nimbus-docs/components/Icon.astro";
+import { withBase } from "@cloudflare/nimbus-docs/runtime";
+
+export const prerender = true;
+
+const base = import.meta.env.BASE_URL;
+const docsHref = withBase("/docs", base);
+const installHref = withBase("/docs/installation", base);
+const featuresHref = withBase("/docs/features", base);
+const logoHref = withBase("/images/logo.png", base);
+
+const features = [
+  {
+    icon: "ph:monitor",
+    title: "跨平台宿主机",
+    body: "在 Linux 与 macOS 上原生运行，自动枚举硬件并套用最优配置。",
+  },
+  {
+    icon: "ph:lightning",
+    title: "两条命令上手",
+    body: "quickget 下载镜像并生成配置，quickemu 直接启动，无需手写 XML。",
+  },
+  {
+    icon: "ph:shield-check",
+    title: "Windows 11 + TPM 2.0",
+    body: "内置 TPM 2.0、Secure Boot 与 EFI 支持，覆盖 Windows 10/11 及 Server。",
+  },
+  {
+    icon: "ph:apple-logo",
+    title: "macOS 全线支持",
+    body: "从 Sequoia 到 Mojave，一条 quickget 命令即可拉起 macOS 虚拟机。",
+  },
+  {
+    icon: "ph:hard-drives",
+    title: "文件共享与剪贴板",
+    body: "SPICE、VirtIO-webdavd/9p 与 Samba，宿主与客户机之间无缝互通。",
+  },
+  {
+    icon: "ph:usb",
+    title: "硬件直通",
+    body: "USB 设备直通、VirGL 加速、全双工音频与自动 SSH 端口转发。",
+  },
+];
+
+const osChips = [
+  "Windows 11", "Windows 10", "Windows Server", "macOS Sequoia", "macOS Sonoma",
+  "macOS Ventura", "Ubuntu", "Fedora", "NixOS", "Debian", "Arch", "openSUSE",
+  "FreeBSD", "OpenBSD", "NetBSD", "Haiku", "FreeDOS", "ReactOS", "KolibriOS", "openIndiana",
+];
+
+const stats = [
+  { value: "≈1000", label: "支持的系统版本" },
+  { value: "2", label: "条命令即可启动" },
+  { value: "TPM 2.0", label: "Windows 11 就绪" },
+  { value: "ARM64", label: "客户机支持" },
+];
+---
+
+<BaseLayout
+  title="Quickemu — 快速创建并运行优化的虚拟机"
+  description="Quickemu 是 QEMU 的一层封装，自动为 Windows、macOS 与 Linux 创建并运行经过优化的虚拟机。"
+>
+  <div class="flex min-h-screen flex-col">
+    <Header showSidebar={false}>
+      <LinkButton slot="actions" href={docsHref} variant="ghost" size="sm" class="hidden sm:inline-flex">
+        文档
+      </LinkButton>
+    </Header>
+
+    <main id="main-content" tabindex="-1" class="flex-1">
+      {/* ---------- Hero ---------- */}
+      <section class="relative isolate overflow-hidden border-b border-border">
+        {/* 背景：品牌光晕 + 网格 */}
+        <div
+          aria-hidden="true"
+          class="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(60%_55%_at_50%_0%,var(--nb-brand-wash),transparent_70%)]"
+        >
+        </div>
+        <div
+          aria-hidden="true"
+          class="pointer-events-none absolute inset-0 -z-10 opacity-[0.35] [mask-image:radial-gradient(60%_50%_at_50%_0%,black,transparent)] bg-[linear-gradient(to_right,var(--nb-border)_1px,transparent_1px),linear-gradient(to_bottom,var(--nb-border)_1px,transparent_1px)] bg-[size:56px_56px]"
+        >
+        </div>
+
+        <div class="mx-auto max-w-6xl px-6 pb-20 pt-16 text-center md:pb-28 md:pt-24">
+          <img src={logoHref} alt="Quickemu Logo" width="96" height="96" class="mx-auto h-20 w-auto drop-shadow-sm md:h-24" />
+
+          <div class="mt-8 inline-flex items-center gap-2 rounded-full border border-border bg-card/70 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur">
+            <span class="relative flex size-2">
+              <span class="absolute inline-flex size-full animate-ping rounded-full bg-brand opacity-60"></span>
+              <span class="relative inline-flex size-2 rounded-full bg-brand"></span>
+            </span>
+            支持 Windows · macOS · Linux
+          </div>
+
+          <h1 class="mx-auto mt-6 max-w-4xl text-balance text-4xl font-semibold tracking-tight text-foreground sm:text-5xl md:text-6xl">
+            一个命令，启动
+            <span class="bg-[linear-gradient(90deg,var(--nb-brand),oklch(0.68_0.17_45))] bg-clip-text text-transparent">任何操作系统</span>
+          </h1>
+
+          <p class="mx-auto mt-6 max-w-2xl text-pretty text-base leading-7 text-muted-foreground sm:text-lg sm:leading-8">
+            Quickemu 是 <a href="https://www.qemu.org/" target="_blank" rel="noopener" class="font-medium text-foreground underline decoration-border underline-offset-4 transition-colors hover:decoration-brand">QEMU</a>
+            的一层封装，会自动<em>“做出正确的选择”</em>。你决定运行哪个系统，剩下的交给它。
+          </p>
+
+          <div class="mt-10 flex flex-wrap items-center justify-center gap-3">
+            <LinkButton href={installHref} variant="primary" size="lg" icon>
+              快速开始
+            </LinkButton>
+            <LinkButton href={docsHref} variant="secondary" size="lg">
+              阅读文档
+            </LinkButton>
+            <LinkButton
+              href="https://github.com/quickemu-project/quickemu"
+              variant="ghost"
+              size="lg"
+              target="_blank"
+              rel="noopener"
+            >
+              <Icon name="ph:github-logo" class="me-1.5 h-4 w-4" />
+              GitHub
+            </LinkButton>
+          </div>
+
+          {/* 终端演示 */}
+          <div class="mx-auto mt-14 max-w-2xl overflow-hidden rounded-xl border border-border bg-card text-left shadow-lg">
+            <div class="flex items-center gap-2 border-b border-border bg-muted/60 px-4 py-2.5">
+              <span class="size-3 rounded-full bg-[#ff5f57]"></span>
+              <span class="size-3 rounded-full bg-[#febc2e]"></span>
+              <span class="size-3 rounded-full bg-[#28c840]"></span>
+              <span class="ms-2 inline-flex items-center gap-1.5 font-mono text-xs text-muted-foreground">
+                <Icon name="ph:terminal-window" class="h-3.5 w-3.5" />
+                bash — quickemu
+              </span>
+            </div>
+            <div class="space-y-3 p-5 font-mono text-sm">
+              <div class="flex gap-3">
+                <span class="select-none text-brand">$</span>
+                <span class="text-foreground">quickget nixos unstable minimal</span>
+              </div>
+              <div class="flex gap-3">
+                <span class="select-none text-brand">$</span>
+                <span class="text-foreground">quickemu --vm nixos-unstable-minimal.conf</span>
+              </div>
+              <div class="flex gap-3 text-muted-foreground">
+                <span class="select-none">&nbsp;</span>
+                <span class="inline-flex items-center gap-1.5">
+                  <Icon name="ph:check-circle" class="h-4 w-4 text-success" />
+                  虚拟机已启动
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* 数据 */}
+          <dl class="mx-auto mt-14 grid max-w-3xl grid-cols-2 gap-px overflow-hidden rounded-xl border border-border bg-border md:grid-cols-4">
+            {stats.map((s) => (
+              <div class="bg-card px-4 py-6">
+                <dt class="order-2 mt-1 text-xs font-medium text-muted-foreground">{s.label}</dt>
+                <dd class="text-2xl font-semibold tracking-tight text-foreground">{s.value}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </section>
+
+      {/* ---------- 特性 ---------- */}
+      <section class="border-b border-border">
+        <div class="mx-auto max-w-6xl px-6 py-20 md:py-24">
+          <div class="mx-auto max-w-2xl text-center">
+            <h2 class="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">为什么选择 Quickemu</h2>
+            <p class="mt-4 text-base leading-7 text-muted-foreground">
+              不写 XML、不调参数，把“配置一台虚拟机”压缩成一条命令。
+            </p>
+          </div>
+
+          <div class="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {features.map((f) => (
+              <div class="group rounded-xl border border-border bg-card p-6 shadow-sm transition-all hover:border-border-strong hover:shadow">
+                <div class="flex size-10 items-center justify-center rounded-lg bg-brand-wash text-brand">
+                  <Icon name={f.icon} class="h-5 w-5" />
+                </div>
+                <h3 class="mt-4 text-base font-semibold text-foreground">{f.title}</h3>
+                <p class="mt-2 text-sm leading-6 text-muted-foreground">{f.body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ---------- 支持的系统 ---------- */}
+      <section class="border-b border-border bg-muted/40">
+        <div class="mx-auto max-w-6xl px-6 py-20 md:py-24">
+          <div class="mx-auto max-w-2xl text-center">
+            <h2 class="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">近 1000 个系统版本</h2>
+            <p class="mt-4 text-base leading-7 text-muted-foreground">
+              从主流发行版到 BSD 与冷门系统，运行 <code class="rounded bg-code-tint px-1.5 py-0.5 font-mono text-sm text-foreground">quickget</code> 即可查看完整列表。
+            </p>
+          </div>
+
+          <ul class="mx-auto mt-12 flex max-w-4xl flex-wrap items-center justify-center gap-2.5">
+            {osChips.map((os) => (
+              <li class="rounded-full border border-border bg-card px-3.5 py-1.5 text-sm text-muted-foreground transition-colors hover:border-border-strong hover:text-foreground">
+                {os}
+              </li>
+            ))}
+            <li class="rounded-full border border-border bg-brand-wash px-3.5 py-1.5 text-sm font-medium text-brand">
+              以及更多…
+            </li>
+          </ul>
+
+          <div class="mt-10 text-center">
+            <LinkButton href={featuresHref} variant="secondary" icon>
+              查看完整特性
+            </LinkButton>
+          </div>
+        </div>
+      </section>
+
+      {/* ---------- CTA ---------- */}
+      <section class="border-b border-border">
+        <div class="mx-auto max-w-6xl px-6 py-20 md:py-24">
+          <div class="relative isolate overflow-hidden rounded-2xl border border-border bg-card px-6 py-16 text-center shadow-sm">
+            <div
+              aria-hidden="true"
+              class="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(50%_120%_at_50%_0%,var(--nb-brand-wash),transparent_70%)]"
+            >
+            </div>
+            <Icon name="ph:rocket" class="mx-auto h-8 w-8 text-brand" />
+            <h2 class="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">准备好开始了吗？</h2>
+            <p class="mx-auto mt-4 max-w-xl text-base leading-7 text-muted-foreground">
+              安装 Quickemu 之后，两条命令即可拉起你的第一台虚拟机。
+            </p>
+            <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
+              <LinkButton href={installHref} variant="primary" size="lg" icon>
+                安装指南
+              </LinkButton>
+              <LinkButton href={docsHref} variant="secondary" size="lg">
+                浏览文档
+              </LinkButton>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <Footer />
+  </div>
+</BaseLayout>

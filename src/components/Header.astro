@@ -72,7 +72,7 @@ const resolveSectionHref = (href: string): string =>
       </slot>
 
       {showSections && (
-        <nav aria-label="Sections" class="hidden md:flex items-center gap-1 ms-4 ps-4 border-s border-border h-6 min-w-0 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <nav aria-label="导航" class="hidden md:flex items-center gap-1 ms-4 ps-4 border-s border-border h-6 min-w-0 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {sections.map((section) => (
             <a
               href={resolveSectionHref(section.href)}
@@ -115,7 +115,7 @@ const resolveSectionHref = (href: string): string =>
           shape="square"
           size="sm"
           icon="ph:list"
-          aria-label="Open navigation"
+          aria-label="打开导航"
           data-menu-btn
           class="md:hidden text-muted-foreground"
         />
@@ -124,7 +124,7 @@ const resolveSectionHref = (href: string): string =>
   </div>
   {/* Phones: the tabs on a row of their own under the bar. */}
   {showSections && (
-    <nav aria-label="Sections" data-nb-header-tabs class="md:hidden flex items-center gap-1 h-10 px-4 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <nav aria-label="导航" data-nb-header-tabs class="md:hidden flex items-center gap-1 h-10 px-4 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       {sections.map((section) => (
         <a
           href={resolveSectionHref(section.href)}
