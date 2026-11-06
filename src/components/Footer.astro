@@ -4,6 +4,7 @@
  */
 import { withBase } from "@cloudflare/nimbus-docs/runtime";
 import { config } from "virtual:nimbus/config";
+import logo from "@/assets/logo.png";
 
 const base = import.meta.env.BASE_URL;
 const homeHref = withBase("/", base);
@@ -23,9 +24,10 @@ const docLinks = [
   { label: "高级配置", href: withBase("/docs/advanced-quickemu", base) },
 ];
 const resourceLinks = [
-  { label: "GitHub 仓库", href: config.github, external: true },
-  { label: "QEMU 官网", href: "https://www.qemu.org/", external: true },
-  { label: "项目 Wiki", href: "https://github.com/quickemu-project/quickemu/wiki", external: true },
+  { label: "GitHub 仓库", href: config.github },
+  { label: "上游 Wiki", href: "https://github.com/quickemu-project/quickemu/wiki" },
+  { label: "QEMU 官网", href: "https://www.qemu.org/" },
+  { label: "Linux Matters 播客", href: "https://linuxmatters.sh/30" },
 ];
 ---
 
@@ -34,11 +36,16 @@ const resourceLinks = [
     <div class="grid gap-10 sm:grid-cols-2 md:grid-cols-4">
       <div class="md:col-span-2 md:max-w-sm">
         <a href={homeHref} class="inline-flex items-center gap-2 font-semibold text-foreground no-underline">
-          <img src={withBase("/images/logo.png", base)} alt="" class="h-6 w-auto" />
+          <img src={logo.src} alt="" width="24" height="24" class="size-6 object-contain" />
           <span>{config.title}</span>
         </a>
         <p class="mt-3 text-sm leading-6 text-muted-foreground">
           Quickemu 是 QEMU 的一层封装，自动为 Windows、macOS 与 Linux 创建并运行经过优化的虚拟机。
+        </p>
+        <p class="mt-3 text-xs leading-5 text-muted-foreground">
+          本站是<strong class="font-medium text-foreground">非官方</strong>中文文档，内容译自
+          <a href="https://github.com/quickemu-project/quickemu/wiki" target="_blank" rel="noopener" class="underline decoration-border underline-offset-4 transition-colors hover:text-foreground hover:decoration-brand">上游 Wiki</a>
+          与 README；Quickemu 项目采用 MIT 许可。
         </p>
       </div>
 
@@ -71,7 +78,7 @@ const resourceLinks = [
     </div>
 
     <div class="mt-12 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-6 text-xs text-muted-foreground">
-      <span>© {year} Quickemu 项目 · 本文档内容基于上游 README 翻译整理</span>
+      <span>© {year} Quickemu 项目 · 中文文档由社区翻译整理</span>
       <span>使用 Nimbus · Astro · Tailwind CSS 构建</span>
     </div>
   </div>

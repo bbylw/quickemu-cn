@@ -48,9 +48,9 @@ const renderer = await createCardRenderer({
   emoji: "strip",
 });
 
-// Quickemu 官方标志是位图（public/images/logo.png），内联为 data URL 供 Satori 使用。
+// Quickemu 官方标志是位图（src/assets/logo.png），内联为 data URL 供 Satori 使用。
 const LOGO_DATA_URL = `data:image/png;base64,${readFileSync(
-  fileURLToPath(new URL("public/images/logo.png", root)),
+  fileURLToPath(new URL("src/assets/logo.png", root)),
 ).toString("base64")}`;
 
 type Style = Record<string, string | number>;
