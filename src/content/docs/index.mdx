@@ -1,50 +1,86 @@
 ---
-title: Introduction
-description: What your product does, who it's for, and where to start.
+title: Quickemu 简介
+description: 快速创建并运行经过优化的 Windows、macOS 与 Linux 虚拟机
 sidebar:
   order: 0
 ---
 
-Describe your product in two sentences: what it does, and who it's for. A reader should know within ten seconds whether they're in the right place.
+# Quickemu
 
-<Aside type="tip" title="This page is yours">
-  Edit `src/content/docs/index.mdx` and save. The page reloads with your changes.
+**快速创建并运行经过优化的 Windows、macOS 与 Linux 虚拟机。**
+
+Quickemu 是对出色的 [QEMU](https://www.qemu.org/) 的一层封装，在创建虚拟机时会自动*“做出正确的选择”*。它不需要繁琐的配置项。你只需决定想运行哪个操作系统，其余的事情 Quickemu 都会替你处理妥当 🤖
+
+<Aside type="tip" title="核心工作方式">
+- `quickget` **自动下载上游操作系统镜像**并生成配置文件 📀
+- `quickemu` 会枚举你的硬件，并以**最适合你这台电脑的最优配置**启动虚拟机 ⚡️
 </Aside>
 
-## What you can do
+## 为什么选择 Quickemu？
 
-List the three things people come here to do, in the words they would use.
+<CardGrid>
+  <Card title="跨平台支持">
+    支持 **Windows**（10/11/Server）、**macOS**（Sequoia 到 Mojave）与 **Linux**（Ubuntu 及所有官方衍生版）。
+  </Card>
+  <Card title="极简工作流">
+    仅需两条命令即可完成从下载到启动的全过程，无需深度配置 QEMU。
+  </Card>
+  <Card title="接近原生的性能">
+    利用 VirGL、VirtIO、SPICE 等技术提供接近原生的虚拟化体验。
+  </Card>
+  <Card title="海量系统支持">
+    支持近 **1000 个**操作系统版本，包括各种 BSD、FreeDOS、Haiku、KolibriOS 等。
+  </Card>
+</CardGrid>
 
-- Something a reader can accomplish on day one.
-- Something they'll need once they're up and running.
-- Something that makes your product different.
-
-## Get started
-
-Show the shortest path to something working. Name the prerequisites first, then one command or one click at a time.
+## 快速上手
 
 <Steps>
-  <Step title="Install">
+  <Step title="生成配置文件">
+    使用 `quickget` 自动下载你需要的操作系统 ISO 并创建虚拟机配置文件。
+
     ```sh
-    npm install your-package
+    quickget nixos unstable minimal
     ```
   </Step>
-  <Step title="See it work">
-    Show the one result that proves the setup worked.
+  <Step title="启动虚拟机">
+    使用生成的配置文件启动虚拟机。
+
+    ```sh
+    quickemu --vm nixos-unstable-minimal.conf
+    ```
   </Step>
 </Steps>
 
-## Add your next page
+执行 `quickget`（不带任何参数）即可查看所有支持的操作系统列表。
 
-Create a file beside this one. It joins the sidebar as soon as you save.
+## 主要特性
 
-```mdx title="src/content/docs/quickstart.mdx"
----
-title: Quickstart
-description: From nothing to a working setup in five minutes.
----
+- 完整的 **SPICE** 支持，包括宿主机与客户机之间的剪贴板共享
+- 为 Linux 和 Windows 客户机提供 **VirtIO-webdavd** 文件共享
+- 为 Linux 和 macOS 客户机提供 **VirtIO-9p** 文件共享
+- 支持 [QEMU Guest Agent](https://wiki.qemu.org/Features/GuestAgent)
+- 为 Linux、macOS 和 Windows 客户机提供 **Samba** 文件共享
+- **VirGL** 加速
+- **USB** 设备直通
+- 自动为客户端转发 **SSH** 端口
+- 全双工音频
+- 盲文支持
+- 支持 **EFI**（可启用或不启用 SecureBoot）与传统 BIOS 启动
 
-Your first guide starts here.
-```
+## 下一步
 
-Before you publish, run `npx @cloudflare/nimbus-docs check` to catch mistakes before your readers do.
+<CardGrid>
+  <Card title="安装指南" href="https://github.com/quickemu-project/quickemu/wiki/01-Installation">
+    了解如何在你的系统上安装 Quickemu。
+  </Card>
+  <Card title="创建 Linux 虚拟机" href="https://github.com/quickemu-project/quickemu/wiki/02-Create-Linux-virtual-machines">
+    在 Quickemu 中运行各种 Linux 发行版。
+  </Card>
+  <Card title="创建 macOS 虚拟机" href="https://github.com/quickemu-project/quickemu/wiki/03-Create-macOS-virtual-machines">
+    在 Quickemu 中运行 macOS。
+  </Card>
+  <Card title="创建 Windows 虚拟机" href="https://github.com/quickemu-project/quickemu/wiki/04-Create-Windows-virtual-machines">
+    在 Quickemu 中运行 Windows。
+  </Card>
+</CardGrid>

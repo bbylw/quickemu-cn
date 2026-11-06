@@ -1,0 +1,38 @@
+---
+title: 安装指南
+description: 在你的系统上安装 Quickemu
+sidebar:
+  order: 2
+---
+
+## 安装 Quickemu
+
+[安装 Quickemu](https://github.com/quickemu-project/quickemu/wiki/01-Installation) 后，只需两个简单步骤即可创建并运行虚拟机。
+
+### 步骤 1：生成配置文件
+
+`quickget` 会自动下载你要运行的操作系统的 ISO 镜像，并为该虚拟机生成配置文件。
+
+```shell
+quickget nixos unstable minimal
+```
+
+### 步骤 2：启动虚拟机
+
+`quickemu` 使用 `quickget` 生成的配置文件启动虚拟机。
+
+```shell
+quickemu --vm nixos-unstable-minimal.conf
+```
+
+执行 `quickget`（不带任何参数）即可查看所有支持的操作系统列表。
+
+## 支持列表
+
+想查看完整支持的操作系统列表，可以直接运行：
+
+```shell
+quickget
+```
+
+这会列出所有支持的 OS 及其版本。

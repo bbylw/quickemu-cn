@@ -1,0 +1,34 @@
+---
+title: 功能特性
+description: Quickemu 支持的操作系统、硬件加速与文件共享能力
+sidebar:
+  order: 1
+---
+
+## 支持的操作系统
+
+- **Linux 与 macOS** 宿主机支持
+- **macOS** Sequoia, Sonoma, Ventura, Monterey, Big Sur, Catalina & Mojave
+- **Windows** 10/11 (包含 TPM 2.0)
+- **Windows Server** 2022/2019/2016
+- **ARM64 客户机**支持 (ARM 宿主原生，x86_64 模拟)
+- [Ubuntu](https://ubuntu.com/desktop) 及所有官方衍生版
+- **近 1000 个操作系统版本支持**
+- 大多数 BSD 系统
+- 新颖的非 Linux 系统：FreeDOS, Haiku, KolibriOS, OpenIndiana, ReactOS 等
+
+## 核心特性
+
+- 完整的 **SPICE** 支持，包括宿主机与客户机剪贴板共享
+- 为 Linux 和 Windows 客户机提供 **VirtIO-webdavd** 文件共享
+- 为 Linux 和 macOS 客户机提供 **VirtIO-9p** 文件共享
+- 支持 [QEMU Guest Agent](https://wiki.qemu.org/Features/GuestAgent)
+- 为 Linux、macOS 和 Windows 客户机提供 **Samba** 文件共享（需在宿主机安装 `smbd`）
+- **VirGL** 加速
+- **USB** 设备直通
+- **智能卡**直通
+- 自动为客户端转发 **SSH** 端口
+- 网络端口转发
+- 全双工音频
+- 盲文支持
+- 支持 **EFI**（可启用或不启用 SecureBoot）与传统 BIOS 启动

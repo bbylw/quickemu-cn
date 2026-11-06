@@ -11,5 +11,6 @@
       "@/*": "src/*"
     }
   },
-  "components": []
+  "components": [],
+  "search": false
 }

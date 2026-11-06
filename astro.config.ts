@@ -6,18 +6,17 @@ import nimbus, {
 import { tableScroll } from "@cloudflare/nimbus-docs/markdown";
 
 const nimbusConfig = defineNimbusConfig({
-  // CHANGE_ME: your site's canonical origin (no trailing slash). Drives
-  // canonical URLs, absolute OG image URLs, robots.txt, sitemap, and the
-  // links in /llms.txt — leaving the placeholder breaks all of them.
-  site: "https://example.com",
-  // CHANGE_ME: your project's name — used for <title>, the home H1, and OG.
-  title: "Nimbus",
-  // CHANGE_ME: a one-line description of your docs — used for meta + OG.
-  description: "Nimbus, authoring tool for docs",
-  locale: "en",
-  // CHANGE_ME: your repository — shown as the GitHub link in the header.
-  github: "https://github.com/cloudflare/nimbus",
-  socialImageAlt: "Nimbus documentation preview",
+  // 站点规范域名（不带结尾斜杠）：决定 canonical URL、OG 绝对地址、
+  // robots.txt、sitemap 以及 /llms.txt 中的链接。
+  site: "https://quickemu-project.github.io/quickemu-docs",
+  // 项目名称：用于 <title>、首页 H1 和 OG。
+  title: "Quickemu 中文文档",
+  // 一句话描述：用于 meta 与 OG。
+  description: "快速创建并运行经过优化的 Windows、macOS 与 Linux 虚拟机",
+  locale: "zh-CN",
+  // 仓库地址：显示在页头的 GitHub 链接。
+  github: "https://github.com/quickemu-project/quickemu",
+  socialImageAlt: "Quickemu 中文文档预览",
   // The home page leads the sidebar; every other page joins it automatically.
   sidebar: {
     items: ["index", { autogenerate: { collection: "docs" } }],
@@ -60,6 +59,8 @@ export default defineConfig({
         // read as attributes too; remove this to keep it as text.
         features: { headingAttributes: true },
       },
+      // 在 Windows 环境下 Pagefind 进程启动存在兼容问题，暂时关闭站内搜索
+      search: false,
     }),
   ],
 });
