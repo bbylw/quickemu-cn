@@ -9,11 +9,13 @@ const nimbusConfig = defineNimbusConfig({
   // 站点规范域名：决定 canonical URL、OG 绝对地址、robots.txt、sitemap
   // 以及 /llms.txt 中的链接。
   //
-  // ⚠️ 部署前请把这里改成你的真实域名（只写 origin，不要带路径）。
-  //   · 根路径部署（Cloudflare Pages/Workers、自定义域名）—— 保持现状即可。
-  //   · 子路径部署（如 GitHub Pages 项目站点 /quickemu-docs）—— 还需在下方
-  //     `defineConfig` 里加上 `base: "/quickemu-docs"`，否则全站链接与索引会 404。
-  site: "https://quickemu-project.github.io",
+  // 站点规范域名：决定 canonical URL、OG 绝对地址、robots.txt、sitemap
+  // 以及 /llms.txt 中的链接。
+  //
+  // 本站部署在 GitHub Pages + 自定义域名 quickemu.ndjp.net（根路径），
+  // 因此不需要设置 `base`。若改用子路径部署，需在下方 `defineConfig`
+  // 里加上 `base: "/<repo>"`，否则全站链接与索引会 404。
+  site: "https://quickemu.ndjp.net",
   // 项目名称：用于 <title>、首页 H1 和 OG。
   title: "Quickemu 中文文档",
   // 一句话描述：用于 meta 与 OG。
@@ -34,7 +36,7 @@ export default defineConfig({
   // nimbus:adapter
   output: "static",
   // 与上方 nimbusConfig.site 保持一致；子路径部署时再加 `base: "/<repo>"`。
-  site: "https://quickemu-project.github.io",
+  site: "https://quickemu.ndjp.net",
   // Tailwind v4 via its Vite plugin (the integration Astro recommends for
   // Tailwind v4 — replaces the PostCSS plugin, which doesn't build under
   // Astro 7's Vite 8 bundler).
