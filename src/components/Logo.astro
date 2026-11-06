@@ -1,6 +1,16 @@
 ---
-/* The site's logo. Uses the Quickemu logo image. */
+/**
+ * 站点 Logo。Quickemu 官方标志是 512×512 的方形 PNG，
+ * 因此容器必须保持正方形（配合 object-contain），否则会被拉伸变形。
+ */
 interface Props { class?: string }
-const { class: cls = "h-5 w-8" } = Astro.props;
+const { class: cls = "h-6 w-6" } = Astro.props;
 ---
-<img src="/images/logo.png" alt="Quickemu" class={cls} />
+<img
+  src="/images/logo.png"
+  alt=""
+  width="512"
+  height="512"
+  decoding="async"
+  class={`object-contain ${cls}`}
+/>

@@ -19,7 +19,31 @@ const docsHref = withBase("/docs", base);
 const installHref = withBase("/docs/installation", base);
 const featuresHref = withBase("/docs/features", base);
 const logoHref = withBase("/images/logo.png", base);
+const githubHref = "https://github.com/quickemu-project/quickemu";
 
+/** 工作方式：三条命令串起整个流程。 */
+const steps = [
+  {
+    icon: "ph:download-simple",
+    title: "拉取镜像",
+    body: "quickget 自动从上游获取官方 ISO，无需手动翻找下载链接。",
+    cmd: "quickget <os> <release> [edition]",
+  },
+  {
+    icon: "ph:cube",
+    title: "生成配置",
+    body: "自动写入一份最优虚拟机配置：CPU、内存、磁盘、网络一次到位。",
+    cmd: "nixos-unstable-minimal.conf",
+  },
+  {
+    icon: "ph:lightning",
+    title: "启动虚拟机",
+    body: "quickemu 读取配置，枚举你的硬件并按最佳参数启动。",
+    cmd: "quickemu --vm <config>",
+  },
+];
+
+/** 核心能力。 */
 const features = [
   {
     icon: "ph:monitor",
@@ -27,12 +51,7 @@ const features = [
     body: "在 Linux 与 macOS 上原生运行，自动枚举硬件并套用最优配置。",
   },
   {
-    icon: "ph:lightning",
-    title: "两条命令上手",
-    body: "quickget 下载镜像并生成配置，quickemu 直接启动，无需手写 XML。",
-  },
-  {
-    icon: "ph:shield-check",
+    icon: "ph:windows-logo",
     title: "Windows 11 + TPM 2.0",
     body: "内置 TPM 2.0、Secure Boot 与 EFI 支持，覆盖 Windows 10/11 及 Server。",
   },
@@ -51,6 +70,11 @@ const features = [
     title: "硬件直通",
     body: "USB 设备直通、VirGL 加速、全双工音频与自动 SSH 端口转发。",
   },
+  {
+    icon: "ph:shield-check",
+    title: "近 1000 个系统",
+    body: "覆盖主流发行版、各种 BSD，以及 FreeDOS、Haiku、ReactOS 等冷门系统。",
+  },
 ];
 
 const osChips = [
@@ -65,6 +89,11 @@ const stats = [
   { value: "TPM 2.0", label: "Windows 11 就绪" },
   { value: "ARM64", label: "客户机支持" },
 ];
+
+const commands = [
+  "quickget nixos unstable minimal",
+  "quickemu --vm nixos-unstable-minimal.conf",
+];
 ---
 
 <BaseLayout
@@ -73,7 +102,7 @@ const stats = [
 >
   <div class="flex min-h-screen flex-col">
     <Header showSidebar={false}>
-      <LinkButton slot="actions" href={docsHref} variant="ghost" size="sm" class="hidden sm:inline-flex">
+      <LinkButton slot="actions" href={docsHref} variant="ghost" size="sm" class="shrink-0">
         文档
       </LinkButton>
     </Header>
@@ -81,7 +110,6 @@ const stats = [
     <main id="main-content" tabindex="-1" class="flex-1">
       {/* ---------- Hero ---------- */}
       <section class="relative isolate overflow-hidden border-b border-border">
-        {/* 背景：品牌光晕 + 网格 */}
         <div
           aria-hidden="true"
           class="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(60%_55%_at_50%_0%,var(--nb-brand-wash),transparent_70%)]"
@@ -89,18 +117,33 @@ const stats = [
         </div>
         <div
           aria-hidden="true"
-          class="pointer-events-none absolute inset-0 -z-10 opacity-[0.35] [mask-image:radial-gradient(60%_50%_at_50%_0%,black,transparent)] bg-[linear-gradient(to_right,var(--nb-border)_1px,transparent_1px),linear-gradient(to_bottom,var(--nb-border)_1px,transparent_1px)] bg-[size:56px_56px]"
+          class="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(to_right,var(--nb-border)_1px,transparent_1px),linear-gradient(to_bottom,var(--nb-border)_1px,transparent_1px)] bg-[size:56px_56px] opacity-[0.35] [mask-image:radial-gradient(60%_50%_at_50%_0%,black,transparent)]"
         >
         </div>
 
         <div class="mx-auto max-w-6xl px-6 pb-20 pt-16 text-center md:pb-28 md:pt-24">
-          <img src={logoHref} alt="Quickemu Logo" width="96" height="96" class="mx-auto h-20 w-auto drop-shadow-sm md:h-24" />
+          <div class="relative mx-auto w-fit">
+            <div
+              aria-hidden="true"
+              class="absolute inset-0 -z-10 scale-150 rounded-full bg-brand/20 blur-2xl"
+            >
+            </div>
+            <img
+              src={logoHref}
+              alt="Quickemu"
+              width="512"
+              height="512"
+              class="h-20 w-20 object-contain select-none md:h-24 md:w-24"
+            />
+          </div>
 
-          <div class="mt-8 inline-flex items-center gap-2 rounded-full border border-border bg-card/70 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur">
-            <span class="relative flex size-2">
-              <span class="absolute inline-flex size-full animate-ping rounded-full bg-brand opacity-60"></span>
-              <span class="relative inline-flex size-2 rounded-full bg-brand"></span>
+          <div class="mt-8 inline-flex items-center gap-2.5 rounded-full border border-border bg-card/70 px-3.5 py-1.5 text-xs font-medium text-muted-foreground backdrop-blur">
+            <span class="flex items-center gap-1.5 text-foreground/70">
+              <Icon name="ph:windows-logo" class="h-3.5 w-3.5" />
+              <Icon name="ph:apple-logo" class="h-3.5 w-3.5" />
+              <Icon name="ph:linux-logo" class="h-3.5 w-3.5" />
             </span>
+            <span class="h-3 w-px bg-border"></span>
             支持 Windows · macOS · Linux
           </div>
 
@@ -111,7 +154,7 @@ const stats = [
 
           <p class="mx-auto mt-6 max-w-2xl text-pretty text-base leading-7 text-muted-foreground sm:text-lg sm:leading-8">
             Quickemu 是 <a href="https://www.qemu.org/" target="_blank" rel="noopener" class="font-medium text-foreground underline decoration-border underline-offset-4 transition-colors hover:decoration-brand">QEMU</a>
-            的一层封装，会自动<em>“做出正确的选择”</em>。你决定运行哪个系统，剩下的交给它。
+            的一层封装，会自动<span class="font-medium text-foreground">“做出正确的选择”</span>。你决定运行哪个系统，剩下的交给它。
           </p>
 
           <div class="mt-10 flex flex-wrap items-center justify-center gap-3">
@@ -121,13 +164,7 @@ const stats = [
             <LinkButton href={docsHref} variant="secondary" size="lg">
               阅读文档
             </LinkButton>
-            <LinkButton
-              href="https://github.com/quickemu-project/quickemu"
-              variant="ghost"
-              size="lg"
-              target="_blank"
-              rel="noopener"
-            >
+            <LinkButton href={githubHref} variant="ghost" size="lg" target="_blank" rel="noopener">
               <Icon name="ph:github-logo" class="me-1.5 h-4 w-4" />
               GitHub
             </LinkButton>
@@ -144,42 +181,96 @@ const stats = [
                 bash — quickemu
               </span>
             </div>
-            <div class="space-y-3 p-5 font-mono text-sm">
-              <div class="flex gap-3">
+
+            <div class="divide-y divide-border/60">
+              {commands.map((cmd) => (
+                <div class="group flex items-center gap-3 px-4 py-4 font-mono text-xs sm:px-5 sm:text-sm">
+                  <span class="select-none text-brand">$</span>
+                  <code class="min-w-0 flex-1 overflow-x-auto whitespace-nowrap text-foreground">{cmd}</code>
+                  <button
+                    type="button"
+                    data-copy={cmd}
+                    aria-label={`复制命令：${cmd}`}
+                    class="flex size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-all hover:bg-accent hover:text-foreground focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2 group-hover:opacity-100 max-md:opacity-60"
+                  >
+                    <Icon name="ph:copy" data-copy-idle class="h-3.5 w-3.5" />
+                    <Icon name="ph:check" data-copy-done class="hidden h-3.5 w-3.5 text-success" />
+                  </button>
+                </div>
+              ))}
+
+              <div class="flex items-center gap-3 px-4 py-4 font-mono text-xs sm:px-5 sm:text-sm">
                 <span class="select-none text-brand">$</span>
-                <span class="text-foreground">quickget nixos unstable minimal</span>
-              </div>
-              <div class="flex gap-3">
-                <span class="select-none text-brand">$</span>
-                <span class="text-foreground">quickemu --vm nixos-unstable-minimal.conf</span>
-              </div>
-              <div class="flex gap-3 text-muted-foreground">
-                <span class="select-none">&nbsp;</span>
-                <span class="inline-flex items-center gap-1.5">
-                  <Icon name="ph:check-circle" class="h-4 w-4 text-success" />
-                  虚拟机已启动
+                <span class="inline-flex items-center gap-1.5 text-muted-foreground">
+                  <span
+                    aria-hidden="true"
+                    class="inline-block h-4 w-2 animate-pulse bg-brand/70 align-middle motion-reduce:animate-none"
+                  ></span>
                 </span>
               </div>
+            </div>
+
+            <div class="border-t border-border/60 bg-muted/30 px-5 py-3 text-xs">
+              <span class="inline-flex items-center gap-1.5 text-muted-foreground">
+                <Icon name="ph:check-circle" class="h-3.5 w-3.5 text-success" />
+                虚拟机已启动 · 自动匹配硬件与网络
+              </span>
             </div>
           </div>
 
           {/* 数据 */}
           <dl class="mx-auto mt-14 grid max-w-3xl grid-cols-2 gap-px overflow-hidden rounded-xl border border-border bg-border md:grid-cols-4">
             {stats.map((s) => (
-              <div class="bg-card px-4 py-6">
+              <div class="flex flex-col bg-card px-4 py-6">
+                <dd class="order-1 text-2xl font-semibold tracking-tight text-foreground">{s.value}</dd>
                 <dt class="order-2 mt-1 text-xs font-medium text-muted-foreground">{s.label}</dt>
-                <dd class="text-2xl font-semibold tracking-tight text-foreground">{s.value}</dd>
               </div>
             ))}
           </dl>
         </div>
       </section>
 
-      {/* ---------- 特性 ---------- */}
-      <section class="border-b border-border">
+      {/* ---------- 工作方式 ---------- */}
+      <section id="how" class="border-b border-border">
         <div class="mx-auto max-w-6xl px-6 py-20 md:py-24">
           <div class="mx-auto max-w-2xl text-center">
-            <h2 class="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">为什么选择 Quickemu</h2>
+            <span class="text-xs font-semibold uppercase tracking-wider text-brand">工作方式</span>
+            <h2 class="mt-3 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">两条命令，一个完整流程</h2>
+            <p class="mt-4 text-base leading-7 text-muted-foreground">
+              从空目录到运行中的虚拟机，中间没有任何需要你手写的配置。
+            </p>
+          </div>
+
+          <ol class="mt-14 grid gap-6 md:grid-cols-3">
+            {steps.map((step, i) => (
+              <li class="relative rounded-xl border border-border bg-card p-6 shadow-sm">
+                <div class="flex items-center gap-3">
+                  <span class="flex size-9 items-center justify-center rounded-lg bg-brand-wash text-sm font-semibold text-brand">
+                    {i + 1}
+                  </span>
+                  <Icon name={step.icon} class="h-5 w-5 text-muted-foreground" />
+                </div>
+                <h3 class="mt-4 text-base font-semibold text-foreground">{step.title}</h3>
+                <p class="mt-2 text-sm leading-6 text-muted-foreground">{step.body}</p>
+                <code class="mt-4 block overflow-x-auto whitespace-nowrap rounded-md bg-code-tint px-3 py-2 font-mono text-xs text-foreground">{step.cmd}</code>
+              </li>
+            ))}
+          </ol>
+
+          <div class="mt-10 text-center">
+            <LinkButton href={installHref} variant="secondary" icon>
+              查看安装指南
+            </LinkButton>
+          </div>
+        </div>
+      </section>
+
+      {/* ---------- 特性 ---------- */}
+      <section id="features" class="border-b border-border bg-muted/40">
+        <div class="mx-auto max-w-6xl px-6 py-20 md:py-24">
+          <div class="mx-auto max-w-2xl text-center">
+            <span class="text-xs font-semibold uppercase tracking-wider text-brand">能力</span>
+            <h2 class="mt-3 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">为什么选择 Quickemu</h2>
             <p class="mt-4 text-base leading-7 text-muted-foreground">
               不写 XML、不调参数，把“配置一台虚拟机”压缩成一条命令。
             </p>
@@ -187,8 +278,13 @@ const stats = [
 
           <div class="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {features.map((f) => (
-              <div class="group rounded-xl border border-border bg-card p-6 shadow-sm transition-all hover:border-border-strong hover:shadow">
-                <div class="flex size-10 items-center justify-center rounded-lg bg-brand-wash text-brand">
+              <div class="group relative overflow-hidden rounded-xl border border-border bg-card p-6 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-border-strong hover:shadow-lg motion-reduce:hover:translate-y-0">
+                <div
+                  aria-hidden="true"
+                  class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brand/50 to-transparent opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+                >
+                </div>
+                <div class="flex size-10 items-center justify-center rounded-lg bg-brand-wash text-brand ring-1 ring-inset ring-brand/10">
                   <Icon name={f.icon} class="h-5 w-5" />
                 </div>
                 <h3 class="mt-4 text-base font-semibold text-foreground">{f.title}</h3>
@@ -200,12 +296,15 @@ const stats = [
       </section>
 
       {/* ---------- 支持的系统 ---------- */}
-      <section class="border-b border-border bg-muted/40">
+      <section id="systems" class="border-b border-border">
         <div class="mx-auto max-w-6xl px-6 py-20 md:py-24">
           <div class="mx-auto max-w-2xl text-center">
-            <h2 class="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">近 1000 个系统版本</h2>
+            <span class="text-xs font-semibold uppercase tracking-wider text-brand">系统矩阵</span>
+            <h2 class="mt-3 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">近 1000 个系统版本</h2>
             <p class="mt-4 text-base leading-7 text-muted-foreground">
-              从主流发行版到 BSD 与冷门系统，运行 <code class="rounded bg-code-tint px-1.5 py-0.5 font-mono text-sm text-foreground">quickget</code> 即可查看完整列表。
+              从主流发行版到 BSD 与冷门系统，运行
+              <code class="rounded bg-code-tint px-1.5 py-0.5 font-mono text-sm text-foreground">quickget</code>
+              即可查看完整列表。
             </p>
           </div>
 
@@ -215,7 +314,7 @@ const stats = [
                 {os}
               </li>
             ))}
-            <li class="rounded-full border border-border bg-brand-wash px-3.5 py-1.5 text-sm font-medium text-brand">
+            <li class="rounded-full border border-brand/20 bg-brand-wash px-3.5 py-1.5 text-sm font-medium text-brand">
               以及更多…
             </li>
           </ul>
@@ -229,7 +328,7 @@ const stats = [
       </section>
 
       {/* ---------- CTA ---------- */}
-      <section class="border-b border-border">
+      <section id="get-started" class="border-b border-border">
         <div class="mx-auto max-w-6xl px-6 py-20 md:py-24">
           <div class="relative isolate overflow-hidden rounded-2xl border border-border bg-card px-6 py-16 text-center shadow-sm">
             <div
@@ -258,3 +357,50 @@ const stats = [
     <Footer />
   </div>
 </BaseLayout>
+
+<script>
+  /** 终端命令的复制按钮；兼容 ClientRouter 的前端导航。 */
+  function initCopyButtons() {
+    document.querySelectorAll<HTMLButtonElement>("[data-copy]").forEach((btn) => {
+      if (btn.dataset.bound === "1") return;
+      btn.dataset.bound = "1";
+
+      btn.addEventListener("click", async () => {
+        const text = btn.dataset.copy ?? "";
+        let ok = false;
+        try {
+          await navigator.clipboard.writeText(text);
+          ok = true;
+        } catch {
+          const ta = document.createElement("textarea");
+          ta.value = text;
+          ta.setAttribute("readonly", "");
+          ta.style.position = "fixed";
+          ta.style.opacity = "0";
+          document.body.appendChild(ta);
+          ta.select();
+          try {
+            ok = document.execCommand("copy");
+          } catch {
+            ok = false;
+          }
+          ta.remove();
+        }
+        if (!ok) return;
+
+        const idle = btn.querySelector("[data-copy-idle]");
+        const done = btn.querySelector("[data-copy-done]");
+        if (!idle || !done) return;
+        idle.classList.add("hidden");
+        done.classList.remove("hidden");
+        window.setTimeout(() => {
+          idle.classList.remove("hidden");
+          done.classList.add("hidden");
+        }, 1200);
+      });
+    });
+  }
+
+  document.addEventListener("astro:page-load", initCopyButtons);
+  if (document.readyState !== "loading") initCopyButtons();
+</script>
